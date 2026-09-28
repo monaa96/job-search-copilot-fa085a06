@@ -5,7 +5,6 @@ import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/welcome")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>) => ({ error: typeof search.error === "string" ? search.error : undefined }),
   beforeLoad: () => {
     // A signed-in visitor landing here should go straight into the app; the
     // "/" guard sends them to /setup if they still need to finish onboarding.
