@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalysesRouteImport } from './routes/analyses'
 import { Route as CompaniesRouteImport } from './routes/companies'
-import { Route as ResumeMatchRouteImport } from './routes/resume-match'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as RolesIdRouteImport } from './routes/roles.$id'
@@ -30,11 +29,6 @@ const AnalysesRoute = AnalysesRouteImport.update({
 const CompaniesRoute = CompaniesRouteImport.update({
   id: '/companies',
   path: '/companies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResumeMatchRoute = ResumeMatchRouteImport.update({
-  id: '/resume-match',
-  path: '/resume-match',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -57,7 +51,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
-  '/resume-match': typeof ResumeMatchRoute
   '/settings': typeof SettingsRoute
   '/skills': typeof SkillsRoute
   '/roles/$id': typeof RolesIdRoute
@@ -66,7 +59,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
-  '/resume-match': typeof ResumeMatchRoute
   '/settings': typeof SettingsRoute
   '/skills': typeof SkillsRoute
   '/roles/$id': typeof RolesIdRoute
@@ -76,7 +68,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
-  '/resume-match': typeof ResumeMatchRoute
   '/settings': typeof SettingsRoute
   '/skills': typeof SkillsRoute
   '/roles/$id': typeof RolesIdRoute
@@ -84,28 +75,14 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/analyses'
-    | '/companies'
-    | '/resume-match'
-    | '/settings'
-    | '/skills'
-    | '/roles/$id'
+    '/' | '/analyses' | '/companies' | '/settings' | '/skills' | '/roles/$id'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/analyses'
-    | '/companies'
-    | '/resume-match'
-    | '/settings'
-    | '/skills'
-    | '/roles/$id'
+  to: '/' | '/analyses' | '/companies' | '/settings' | '/skills' | '/roles/$id'
   id:
     | '__root__'
     | '/'
     | '/analyses'
     | '/companies'
-    | '/resume-match'
     | '/settings'
     | '/skills'
     | '/roles/$id'
@@ -115,7 +92,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysesRoute: typeof AnalysesRoute
   CompaniesRoute: typeof CompaniesRoute
-  ResumeMatchRoute: typeof ResumeMatchRoute
   SettingsRoute: typeof SettingsRoute
   SkillsRoute: typeof SkillsRoute
   RolesIdRoute: typeof RolesIdRoute
@@ -142,13 +118,6 @@ declare module '@tanstack/react-router' {
       path: '/companies'
       fullPath: '/companies'
       preLoaderRoute: typeof CompaniesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resume-match': {
-      id: '/resume-match'
-      path: '/resume-match'
-      fullPath: '/resume-match'
-      preLoaderRoute: typeof ResumeMatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -179,7 +148,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysesRoute: AnalysesRoute,
   CompaniesRoute: CompaniesRoute,
-  ResumeMatchRoute: ResumeMatchRoute,
   SettingsRoute: SettingsRoute,
   SkillsRoute: SkillsRoute,
   RolesIdRoute: RolesIdRoute,
