@@ -27,6 +27,7 @@ function GoogleMark() {
 
 function WelcomePage() {
   const navigate = useNavigate();
+  const { error } = Route.useSearch();
   const signIn = () => {
     if (USE_MOCK) { setToken("mock-token"); navigate({ to: "/" }); return; }
     window.location.href = signInUrl();
@@ -40,6 +41,7 @@ function WelcomePage() {
           <h1 className="mt-4 text-4xl font-extrabold leading-[1.08] sm:text-6xl">Find the roles you're actually a fit for</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-primary-foreground/85">Job Search Copilot scans the companies that match you every day, ranks new openings against your resume, and shows you how to close the gap for each one.</p>
           <button type="button" onClick={signIn} className="mt-9 inline-flex h-12 items-center gap-3 rounded-lg bg-card px-5 text-base font-bold text-foreground shadow-card-hover transition hover:-translate-y-0.5"><GoogleMark />Sign in with Google</button>
+          {error && <p className="mt-6 max-w-2xl rounded-lg border border-primary-foreground/25 bg-card/15 px-4 py-3 text-sm font-semibold text-primary-foreground">{error}</p>}
         </div>
       </div>
     </section>
