@@ -50,7 +50,9 @@ function RolesPage() {
   const [sort, setSortState] = useState<RoleSort>(readSort);
   const setPostedWithin = (n: number) => { localStorage.setItem(DATE_KEY, String(n)); setPostedWithinState(n); };
   const setSort = (v: RoleSort) => { localStorage.setItem(SORT_KEY, v); setSortState(v); };
-  const { data, isFetching } = useQuery({ ...rolesQuery({ postedWithin: postedWithin || null, sort }), placeholderData: keepPreviousData }) as { data: NonNullable<ReturnType<typeof useQuery<import("@/lib/api").RolesResponse>>["data"]>; isFetching: boolean };
+  const rolesResult = useQuery({ ...rolesQuery({ postedWithin: postedWithin || null, sort }), placeholderData: keepPreviousData });
+  const isFetching = rolesResult.isFetching;
+  const data = rolesResult.data ?? { stats: { strong_count: 0, saved_count: 0, companies_watched: 0, min_score: 60 }, roles: [] };
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: RoleSummary["status"] }) => setRoleStatus(id, status),
     onError: showError,
