@@ -1,22 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { RefreshCw, Users, X } from "lucide-react";
 import { ConnectionsDialog } from "@/components/connections-ui";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RoleCard } from "@/components/job-ui";
-import { refreshRoles, setRoleStatus, type RoleSummary } from "@/lib/api";
+import { refreshRoles, setRoleStatus, type RoleSort, type RoleSummary } from "@/lib/api";
 import { meQuery, requireSetup, rolesQuery, showError } from "@/lib/queries";
 import { JobProgress, useJob } from "@/components/progress-ui";
 import { cn } from "@/lib/utils";
 
 type RoleView = "best" | "saved" | "all";
+const DATE_KEY = "jsc_roles_posted_within";
+const SORT_KEY = "jsc_roles_sort";
+const dateOptions = [{ value: 0, label: "Any time" }, { value: 1, label: "Past 24 hours" }, { value: 7, label: "Past week" }, { value: 30, label: "Past month" }];
+const readDate = () => { if (typeof window === "undefined") return 0; const n = Number(localStorage.getItem(DATE_KEY)); return [1, 7, 30].includes(n) ? n : 0; };
+const readSort = (): RoleSort => typeof window !== "undefined" && localStorage.getItem(SORT_KEY) === "recent" ? "recent" : "fit";
+const selectClass = "h-10 rounded-lg border border-border bg-card px-3 pr-8 text-sm font-semibold text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 
 export const Route = createFileRoute("/")({
   ssr: false,
   beforeLoad: requireSetup,
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(meQuery), context.queryClient.ensureQueryData(rolesQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(meQuery), context.queryClient.ensureQueryData(rolesQuery({ postedWithin: readDate() || null, sort: readSort() }))]),
   head: () => ({
     meta: [
       { title: "Roles for You — Job Search Copilot" },
@@ -40,7 +46,11 @@ function RolesPage() {
   const queryClient = useQueryClient();
   const job = useJob();
   const { data: me } = useSuspenseQuery(meQuery);
-  const { data, isFetching } = useSuspenseQuery(rolesQuery);
+  const [postedWithin, setPostedWithinState] = useState(readDate);
+  const [sort, setSortState] = useState<RoleSort>(readSort);
+  const setPostedWithin = (n: number) => { localStorage.setItem(DATE_KEY, String(n)); setPostedWithinState(n); };
+  const setSort = (v: RoleSort) => { localStorage.setItem(SORT_KEY, v); setSortState(v); };
+  const { data, isFetching } = useQuery({ ...rolesQuery({ postedWithin: postedWithin || null, sort }), placeholderData: keepPreviousData }) as { data: NonNullable<ReturnType<typeof useQuery<import("@/lib/api").RolesResponse>>["data"]>; isFetching: boolean };
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: RoleSummary["status"] }) => setRoleStatus(id, status),
     onError: showError,
@@ -79,9 +89,13 @@ function RolesPage() {
       <StatCard label="Companies watched" value={stats.companies_watched} accent="bg-violet" />
     </section>
 
-    <section className="mt-8 rounded-xl border border-border bg-card p-2 shadow-card">
-      <div className="grid grid-cols-3 gap-1" role="tablist" aria-label="Role views">
+    <section className="mt-8 flex flex-col gap-2 rounded-xl border border-border bg-card p-2 shadow-card md:flex-row md:items-center">
+      <div className="grid flex-1 grid-cols-3 gap-1" role="tablist" aria-label="Role views">
         {tabs.map((tab) => <button key={tab.value} type="button" onClick={() => setView(tab.value)} className={cn("h-10 rounded-lg text-sm font-bold text-muted-foreground transition", view === tab.value && "bg-primary text-primary-foreground")}>{tab.label}</button>)}
+      </div>
+      <div className="grid grid-cols-2 gap-2 md:flex">
+        <label className="grid gap-0.5 md:flex md:items-center md:gap-2"><span className="sr-only md:not-sr-only md:text-xs md:font-semibold md:text-muted-foreground">Date posted</span><select aria-label="Date posted" className={selectClass} value={postedWithin} onChange={(e) => setPostedWithin(Number(e.target.value))}>{dateOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>
+        <label className="grid gap-0.5 md:flex md:items-center md:gap-2"><span className="sr-only md:not-sr-only md:text-xs md:font-semibold md:text-muted-foreground">Sort by</span><select aria-label="Sort by" className={selectClass} value={sort} onChange={(e) => setSort(e.target.value as RoleSort)}><option value="fit">Best fit</option><option value="recent">Most recent</option></select></label>
       </div>
     </section>
 
@@ -92,7 +106,8 @@ function RolesPage() {
     <ConnectionsDialog open={importOpen} onOpenChange={setImportOpen} onUploaded={() => queryClient.invalidateQueries({ queryKey: ["roles"] })} />
 
     <section className="mt-5 grid gap-4" aria-live="polite">
-      {roles.length === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">{data.roles.length === 0 ? "No roles yet" : view === "saved" ? "Nothing saved yet" : "No roles in this view"}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{data.roles.length === 0 ? "Your watched companies are checked every morning. You can also check right now and new roles will be scored against your resume." : view === "saved" ? "Bookmark a role to keep it here." : "Try another view or check for new roles."}</p>{view !== "saved" && <Button className="mt-5" onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>}</div>}
+      {roles.length === 0 && postedWithin > 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">No roles posted in the {dateOptions.find((o) => o.value === postedWithin)?.label.toLowerCase()}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Your date filter is hiding older roles{view === "saved" ? " you saved" : ""}.</p><Button className="mt-5" variant="secondary" onClick={() => setPostedWithin(0)}>Show any time</Button></div>}
+      {roles.length === 0 && postedWithin === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">{data.roles.length === 0 ? "No roles yet" : view === "saved" ? "Nothing saved yet" : "No roles in this view"}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{data.roles.length === 0 ? "Your watched companies are checked every morning. You can also check right now and new roles will be scored against your resume." : view === "saved" ? "Bookmark a role to keep it here." : "Try another view or check for new roles."}</p>{view !== "saved" && <Button className="mt-5" onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>}</div>}
       {roles.map((role) => <RoleCard key={role.id} role={role} onStatus={(status) => statusMutation.mutate({ id: role.id, status })} />)}
       {isFetching && <p className="text-center text-sm font-medium text-muted-foreground">Updating roles…</p>}
     </section>

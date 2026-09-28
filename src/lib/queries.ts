@@ -2,10 +2,10 @@ import { queryOptions } from "@tanstack/react-query";
 import { redirect } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ApiError, getAnalyses, getCompanies, getMe, getRoles, getSearch, getSkills, getToken, USE_MOCK } from "./api";
+import { ApiError, type RoleFilters, getAnalyses, getCompanies, getMe, getRoles, getSearch, getSkills, getToken, USE_MOCK } from "./api";
 
 export const meQuery = queryOptions({ queryKey: ["me"], queryFn: getMe });
-export const rolesQuery = queryOptions({ queryKey: ["roles"], queryFn: () => getRoles("all") });
+export const rolesQuery = (filters: RoleFilters = {}) => queryOptions({ queryKey: ["roles", filters.postedWithin ?? null, filters.sort ?? "fit"], queryFn: () => getRoles("all", filters) });
 export const companiesQuery = queryOptions({ queryKey: ["companies"], queryFn: getCompanies });
 export const skillsQuery = queryOptions({ queryKey: ["skills"], queryFn: getSkills });
 export const analysesQuery = queryOptions({ queryKey: ["analyses"], queryFn: getAnalyses });

@@ -145,10 +145,19 @@ export async function getMe(): Promise<Me> {
   me.onboarding.has_companies = companies.watching.length > 0;
   return mock(me, 250);
 }
-export async function getRoles(view: "best" | "saved" | "all" = "best"): Promise<RolesResponse> {
-  if (!USE_MOCK) return request(`/api/roles?view=${view}`);
+export type RoleSort = "fit" | "recent";
+export type RoleFilters = { postedWithin?: number | null | undefined; sort?: RoleSort | undefined };
+export async function getRoles(view: "best" | "saved" | "all" = "best", filters: RoleFilters = {}): Promise<RolesResponse> {
+  const { postedWithin, sort = "fit" } = filters;
+  if (!USE_MOCK) {
+    const qs = new URLSearchParams({ view, sort });
+    if (postedWithin) qs.set("posted_within", String(postedWithin));
+    return request(`/api/roles?${qs}`);
+  }
   await pause();
-  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= search.min_score)));
+  const cutoff = postedWithin ? Date.now() - postedWithin * 86_400_000 : null;
+  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= search.min_score)) && (cutoff === null || (role.posted_at !== null && new Date(role.posted_at).getTime() >= cutoff)));
+  visible.sort((a, b) => sort === "recent" ? (b.posted_at ? Date.parse(b.posted_at) : 0) - (a.posted_at ? Date.parse(a.posted_at) : 0) : b.fit_score - a.fit_score);
   return { stats: { strong_count: roles.filter((role) => role.fit_score >= search.min_score && role.status !== "dismissed").length, saved_count: roles.filter((role) => role.status === "saved").length, companies_watched: companies.watching.length, min_score: search.min_score }, roles: structuredClone(visible) };
 }
 export async function getRole(id: number): Promise<RoleDetail> {
