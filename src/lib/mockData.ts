@@ -93,6 +93,28 @@ export const mockRoleDetails: Record<number, RoleDetail> = Object.fromEntries(mo
   ] : [],
 }])) as Record<number, RoleDetail>;
 
-export const mockCompanies: CompaniesResponse = { suggested: [], watching: mockRoles.slice(0, 5).map((role) => ({ id: role.company_id, name: role.company, logo_url: role.logo_url, board_name: "Careers", board_url: role.url, why_it_fits: role.fit_reason, open_roles: 3, known_people: role.known_people })), untrackable: [] };
-export const mockSkills: SkillsResponse = { analyses_count: 3, min_analyses: 3, new_since_report: 0, report: { summary: "Your clearest advantage is payments platform leadership. Risk systems and AI product fluency would unlock more roles.", themes: [], roles_count: 8, created_at: "2026-09-28T08:00:00Z" } };
+export const mockCompanies: CompaniesResponse = {
+  suggested: [
+    { id: 11, name: "Stripe", logo_url: logo("stripe.com"), board_name: "Greenhouse job board", board_url: "https://stripe.com/jobs", why_it_fits: "Stripe's platform and money-movement teams hire PMs who have built APIs other teams depend on, which is exactly your strongest story. Several open roles sit in New York.", open_roles: 4, known_people: 2 },
+    { id: 12, name: "Brex", logo_url: logo("brex.com"), board_name: "Greenhouse job board", board_url: "https://www.brex.com/careers", why_it_fits: "Brex is rebuilding its payments and spend-management platform, and your integration-time results speak directly to that work.", open_roles: 2, known_people: 0 },
+    { id: 13, name: "Increase", logo_url: logo("increase.com"), board_name: "Ashby job board", board_url: "https://increase.com/careers", why_it_fits: "A small, technical team building bank infrastructure for developers. Your founding-PM experience fits their stage.", open_roles: 0, known_people: 1 },
+  ],
+  watching: mockRoles.slice(0, 5).map((role, i) => ({ id: role.company_id, name: role.company, logo_url: role.logo_url, board_name: i % 2 ? "Greenhouse job board" : "Ashby job board", board_url: role.url, why_it_fits: role.fit_reason, open_roles: [4, 2, 3, 1, 2][i] ?? 0, known_people: role.known_people })),
+  untrackable: [
+    { id: 21, name: "Chime", logo_url: logo("chime.com"), board_name: null, board_url: null, why_it_fits: "Strong consumer payments team, but their careers site doesn't use a job board we can read automatically.", open_roles: 0, known_people: 0 },
+    { id: 22, name: "Capital One", logo_url: logo("capitalone.com"), board_name: null, board_url: null, why_it_fits: "Large payments platform org in New York; openings are posted on a custom Workday site.", open_roles: 0, known_people: 1 },
+  ],
+};
+export const mockSkills: SkillsResponse = {
+  analyses_count: 4, min_analyses: 3, new_since_report: 1,
+  report: {
+    summary: "Your clearest advantage is payments platform leadership: every role you analyzed values it. The pattern holding you back is depth in risk systems and hands-on fluency with AI products. Closing those two gaps would move three roles from Good fit to Strong fit.",
+    roles_count: 4, created_at: "2026-09-27T16:00:00Z",
+    themes: [
+      { skill: "Risk and fraud systems", priority: "high", roles: [{ title: "Senior Product Manager, Risk", company: "Mercury", role_id: 4 }, { title: "Product Manager, Money Movement", company: "Plaid", role_id: 2 }, { title: "Product Lead, Payment Operations", company: "Modern Treasury", role_id: 3 }], why_it_matters: "Fintech PM roles increasingly own loss rates and fraud tradeoffs. Hiring managers want to see you can reason about false positives, model thresholds and the cost of friction.", what_you_have: "You designed retry and reconciliation logic in your payments API and worked with compliance on KYC requirements.", plan: [{ action: "Take a short course on fraud detection fundamentals (e.g. Sift or Stripe Radar docs and case studies)", time: "1 week" }, { action: "Interview two risk PMs from your network about how they measure success", time: "2 hours" }, { action: "Write a one-page teardown of a fraud flow you know well", time: "1 weekend" }], proof_project: "Publish a teardown of how Mercury or Ramp could reduce ACH return losses, with a proposed metric tree and experiment plan." },
+      { skill: "AI product fluency", priority: "medium", roles: [{ title: "Product Manager, Enterprise", company: "Anthropic", role_id: 5 }, { title: "Senior Product Manager, Payments Platform", company: "Ramp", role_id: 1 }], why_it_matters: "AI companies and AI-heavy fintechs want PMs who have shipped with LLMs and understand evaluation, latency and cost tradeoffs.", what_you_have: "You scoped an ML-based invoice matching feature at your startup and worked closely with data science.", plan: [{ action: "Build a small LLM tool that categorizes transactions using a public API", time: "2 weekends" }, { action: "Write an evaluation set and track accuracy across prompt versions", time: "3 evenings" }], proof_project: "Ship a transaction-categorization demo with a written eval report comparing two approaches." },
+      { skill: "Bank rails and ledgers", priority: "low", roles: [{ title: "Product Lead, Payment Operations", company: "Modern Treasury", role_id: 3 }, { title: "Payments Strategy Lead", company: "Adyen", role_id: null }], why_it_matters: "Payment operations roles expect you to speak fluently about ACH, wires, RTP and double-entry ledgers.", what_you_have: "Your internal API abstracted card and ACH flows, so you know the basics of settlement timing.", plan: [{ action: "Read Modern Treasury's Payments Journal guides on ACH, wires and RTP", time: "4 hours" }, { action: "Sketch a double-entry ledger for a simple marketplace", time: "1 evening" }], proof_project: "Write a short explainer comparing payment rails for a B2B payouts use case." },
+    ],
+  },
+};
 export const mockAnalyses: SavedAnalysis[] = [{ id: 1, title: rampAnalysis.job_title, company: rampAnalysis.company, match_score: rampAnalysis.match_score, created_at: "2026-09-27T14:20:00Z", analysis: rampAnalysis }];
