@@ -71,7 +71,7 @@ function RolesPage() {
     onSuccess: async (result) => { setRefreshMessage(result.summary); await Promise.all([queryClient.invalidateQueries({ queryKey: ["roles"] }), queryClient.invalidateQueries({ queryKey: ["me"] })]); },
   });
   const updated = me.last_scan ? `Last updated ${me.last_scan}` : "Updated automatically every morning";
-  const roles = data.roles.filter((role) => view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= data.stats.min_score));
+  const roles = data.roles.filter((role) => view === "all" || (view === "saved" ? role.status === "saved" : (role.fit_score ?? -1) >= data.stats.min_score));
   const stats = data.stats;
   const tabs: { value: RoleView; label: string }[] = useMemo(() => [{ value: "best", label: "Best matches" }, { value: "saved", label: "Saved" }, { value: "all", label: "All roles" }], []);
 
