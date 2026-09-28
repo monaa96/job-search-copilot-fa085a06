@@ -3,7 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearToken } from "@/lib/api";
 import { meQuery } from "@/lib/queries";
-import { BarChart3, Bookmark, BriefcaseBusiness, Building2, ChevronDown, FileSearch, Menu, Sparkles, Target, UserRound, X } from "lucide-react";
+import { BarChart3, Bookmark, BriefcaseBusiness, Building2, ChevronDown, Clock, FileSearch, Menu, Sparkles, Target, UserRound, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { FitColor, RoleSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -68,7 +68,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 const fitStyles: Record<FitColor, string> = { green: "bg-fit-green-soft text-fit-green border-fit-green-border", blue: "bg-fit-blue-soft text-fit-blue border-fit-blue-border", orange: "bg-fit-orange-soft text-fit-orange border-fit-orange-border", gray: "bg-fit-gray-soft text-fit-gray border-fit-gray-border" };
 const stripeStyles: Record<FitColor, string> = { green: "border-l-fit-green", blue: "border-l-fit-blue", orange: "border-l-fit-orange", gray: "border-l-fit-gray" };
 
-export function FitBadge({ score, label, color }: { score: number; label: string; color: FitColor }) {
+export function FitBadge({ score, label, color }: { score: number | null; label: string; color: FitColor }) {
+  if (score === null) return <span className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 text-xs font-semibold text-muted-foreground"><Clock className="size-3.5" aria-hidden />{label || "Not scored yet"}</span>;
   return <span className={cn("inline-flex h-7 shrink-0 items-center rounded-full border px-2.5 text-xs font-bold", fitStyles[color])}>{score} · {label}</span>;
 }
 

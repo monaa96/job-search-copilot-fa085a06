@@ -157,9 +157,9 @@ export async function getRoles(view: "best" | "saved" | "all" = "best", filters:
   }
   await pause();
   const cutoff = postedWithin ? Date.now() - postedWithin * 86_400_000 : null;
-  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= search.min_score)) && (!companyId || role.company_id === companyId) && (cutoff === null || (role.posted_at !== null && new Date(role.posted_at).getTime() >= cutoff)));
-  visible.sort((a, b) => sort === "recent" ? (b.posted_at ? Date.parse(b.posted_at) : 0) - (a.posted_at ? Date.parse(a.posted_at) : 0) : b.fit_score - a.fit_score);
-  return { stats: { strong_count: roles.filter((role) => role.fit_score >= search.min_score && role.status !== "dismissed").length, saved_count: roles.filter((role) => role.status === "saved").length, companies_watched: companies.watching.length, min_score: search.min_score }, roles: structuredClone(visible) };
+  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : (role.fit_score ?? -1) >= search.min_score)) && (!companyId || role.company_id === companyId) && (cutoff === null || (role.posted_at !== null && new Date(role.posted_at).getTime() >= cutoff)));
+  visible.sort((a, b) => sort === "recent" ? (b.posted_at ? Date.parse(b.posted_at) : 0) - (a.posted_at ? Date.parse(a.posted_at) : 0) : (b.fit_score ?? -1) - (a.fit_score ?? -1));
+  return { stats: { strong_count: roles.filter((role) => (role.fit_score ?? -1) >= search.min_score && role.status !== "dismissed").length, saved_count: roles.filter((role) => role.status === "saved").length, companies_watched: companies.watching.length, min_score: search.min_score }, roles: structuredClone(visible) };
 }
 export async function getRole(id: number): Promise<RoleDetail> {
   if (!USE_MOCK) return request(`/api/roles/${id}`);
@@ -184,7 +184,7 @@ export async function buildPlan(id: number, onLog?: LogHandler): Promise<RoleDet
   if (!current || !template) throw new ApiError("Role not found", 404);
   bump("analyses");
   return mockJob([`Reading the ${current.role.company} job description…`, "Comparing requirements to your resume…", "Checking who you know there…", "Looking for adjacent roles…", "Writing your plan…"], () => {
-    details[id] = { ...current, analysis: { ...template.analysis, job_title: current.role.title, company: current.role.company, match_score: current.role.fit_score } as Analysis, recommendation: { headline: current.role.fit_score >= 70 ? "Apply with a focused story" : "Build evidence before applying", detail: "Use the plan below to close the most important gaps and make your relevant experience unmistakable.", color: current.role.fit_color }, plan: structuredClone(template.plan).map((step) => ({ ...step, done: false })), people: [], adjacent: structuredClone(template.adjacent), role: { ...current.role, has_plan: true } };
+    details[id] = { ...current, analysis: { ...template.analysis, job_title: current.role.title, company: current.role.company, match_score: current.role.fit_score ?? 0 } as Analysis, recommendation: { headline: (current.role.fit_score ?? 0) >= 70 ? "Apply with a focused story" : "Build evidence before applying", detail: "Use the plan below to close the most important gaps and make your relevant experience unmistakable.", color: current.role.fit_color }, plan: structuredClone(template.plan).map((step) => ({ ...step, done: false })), people: [], adjacent: structuredClone(template.adjacent), role: { ...current.role, has_plan: true } };
     roles = roles.map((role) => role.id === id ? { ...role, has_plan: true } : role);
     return structuredClone(details[id] as RoleDetail);
   }, 6000, onLog);
@@ -238,14 +238,24 @@ export async function discoverCompanies(onLog?: LogHandler): Promise<CompaniesRe
     return structuredClone(companies);
   }, 7000, onLog);
 }
-export async function addCompany(name: string, careers_url?: string): Promise<Company> {
+export type AddedCompany = Company & { scan_job_id: string | null };
+/** Polls the scan job started by addCompany; resolves when the company's board has been checked. */
+export async function scanCompany(company: AddedCompany, onLog?: LogHandler): Promise<unknown> {
+  if (!USE_MOCK) return company.scan_job_id ? runJob(() => Promise.resolve({ job_id: company.scan_job_id as string }), onLog) : null;
+  return mockJob([`Opening ${company.name}'s job board…`, "Reading open roles…", "Scoring new roles against your resume…"], () => {
+    const found = companies.watching.find((c) => c.id === company.id);
+    if (found) found.open_roles = 3;
+    return null;
+  }, 6000, onLog);
+}
+export async function addCompany(name: string, careers_url?: string): Promise<AddedCompany> {
   if (!USE_MOCK) return request("/api/companies", json("POST", { name, careers_url: careers_url || undefined }));
   await pause(900);
   if (/acme|test/i.test(name) && !careers_url) throw new ApiError(`We couldn't find a job board for ${name}. Try adding its careers page URL.`, 404);
   const company: Company = { id: Date.now(), company_id: null, name, logo_url: null, board_name: "Ashby job board", board_url: careers_url || null, why_it_fits: "Added by you.", open_roles: 0, known_people: 0 };
   companies.watching.unshift(company);
   me.onboarding.has_companies = true;
-  return structuredClone(company);
+  return { ...structuredClone(company), scan_job_id: `mock-${company.id}` };
 }
 export async function setCompanyStatus(id: number, status: "tracking" | "rejected"): Promise<CompaniesResponse> {
   if (!USE_MOCK) return request(`/api/companies/${id}/status`, json("POST", { status }));
