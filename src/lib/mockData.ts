@@ -9,7 +9,7 @@ export type PlanStep = { key: string; kind: "resume" | "skill" | "referral" | "s
 export type Person = { index: number; name: string; position: string; url: string; why: string };
 export type Opening = { title: string; company: string; logo_url: string | null; location: string; url: string };
 export type RoleDetail = { role: RoleSummary; analysis: Analysis | null; recommendation: { headline: string; detail: string; color: FitColor } | null; plan: PlanStep[]; people: Person[]; has_connections: boolean; adjacent: { title: string; why: string; in_search: boolean; openings: Opening[] }[] };
-export type Company = { id: number; name: string; logo_url: string | null; board_name: string | null; board_url: string | null; why_it_fits: string; open_roles: number; known_people: number };
+export type Company = { id: number; company_id: number | null; name: string; logo_url: string | null; board_name: string | null; board_url: string | null; why_it_fits: string; open_roles: number; known_people: number };
 export type CompaniesResponse = { suggested: Company[]; watching: Company[]; untrackable: Company[] };
 export type SkillTheme = { skill: string; priority: "high" | "medium" | "low"; roles: { title: string; company: string; role_id: number | null }[]; why_it_matters: string; what_you_have: string; plan: { action: string; time: string }[]; proof_project: string };
 export type SkillsResponse = { analyses_count: number; min_analyses: number; new_since_report: number; report: { summary: string; themes: SkillTheme[]; roles_count: number; created_at: string } | null };
@@ -95,14 +95,14 @@ export const mockRoleDetails: Record<number, RoleDetail> = Object.fromEntries(mo
 
 export const mockCompanies: CompaniesResponse = {
   suggested: [
-    { id: 11, name: "Stripe", logo_url: logo("stripe.com"), board_name: "Greenhouse job board", board_url: "https://stripe.com/jobs", why_it_fits: "Stripe's platform and money-movement teams hire PMs who have built APIs other teams depend on, which is exactly your strongest story. Several open roles sit in New York.", open_roles: 4, known_people: 2 },
-    { id: 12, name: "Brex", logo_url: logo("brex.com"), board_name: "Greenhouse job board", board_url: "https://www.brex.com/careers", why_it_fits: "Brex is rebuilding its payments and spend-management platform, and your integration-time results speak directly to that work.", open_roles: 2, known_people: 0 },
-    { id: 13, name: "Increase", logo_url: logo("increase.com"), board_name: "Ashby job board", board_url: "https://increase.com/careers", why_it_fits: "A small, technical team building bank infrastructure for developers. Your founding-PM experience fits their stage.", open_roles: 0, known_people: 1 },
+    { id: 11, company_id: null, name: "Stripe", logo_url: logo("stripe.com"), board_name: "Greenhouse job board", board_url: "https://stripe.com/jobs", why_it_fits: "Stripe's platform and money-movement teams hire PMs who have built APIs other teams depend on, which is exactly your strongest story. Several open roles sit in New York.", open_roles: 4, known_people: 2 },
+    { id: 12, company_id: null, name: "Brex", logo_url: logo("brex.com"), board_name: "Greenhouse job board", board_url: "https://www.brex.com/careers", why_it_fits: "Brex is rebuilding its payments and spend-management platform, and your integration-time results speak directly to that work.", open_roles: 2, known_people: 0 },
+    { id: 13, company_id: null, name: "Increase", logo_url: logo("increase.com"), board_name: "Ashby job board", board_url: "https://increase.com/careers", why_it_fits: "A small, technical team building bank infrastructure for developers. Your founding-PM experience fits their stage.", open_roles: 0, known_people: 1 },
   ],
-  watching: mockRoles.slice(0, 5).map((role, i) => ({ id: role.company_id, name: role.company, logo_url: role.logo_url, board_name: i % 2 ? "Greenhouse job board" : "Ashby job board", board_url: role.url, why_it_fits: role.fit_reason, open_roles: [4, 2, 3, 1, 2][i] ?? 0, known_people: role.known_people })),
+  watching: mockRoles.slice(0, 5).map((role, i) => ({ id: role.company_id, company_id: role.company_id, name: role.company, logo_url: role.logo_url, board_name: i % 2 ? "Greenhouse job board" : "Ashby job board", board_url: role.url, why_it_fits: role.fit_reason, open_roles: [4, 2, 3, 1, 2][i] ?? 0, known_people: role.known_people })),
   untrackable: [
-    { id: 21, name: "Chime", logo_url: logo("chime.com"), board_name: null, board_url: null, why_it_fits: "Strong consumer payments team, but their careers site doesn't use a job board we can read automatically.", open_roles: 0, known_people: 0 },
-    { id: 22, name: "Capital One", logo_url: logo("capitalone.com"), board_name: null, board_url: null, why_it_fits: "Large payments platform org in New York; openings are posted on a custom Workday site.", open_roles: 0, known_people: 1 },
+    { id: 21, company_id: null, name: "Chime", logo_url: logo("chime.com"), board_name: null, board_url: null, why_it_fits: "Strong consumer payments team, but their careers site doesn't use a job board we can read automatically.", open_roles: 0, known_people: 0 },
+    { id: 22, company_id: null, name: "Capital One", logo_url: logo("capitalone.com"), board_name: null, board_url: null, why_it_fits: "Large payments platform org in New York; openings are posted on a custom Workday site.", open_roles: 0, known_people: 1 },
   ],
 };
 export const mockSkills: SkillsResponse = {

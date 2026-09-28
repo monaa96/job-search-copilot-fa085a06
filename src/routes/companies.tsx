@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { ChevronDown, Search } from "lucide-react";
+import { ArrowRight, ChevronDown, Search } from "lucide-react";
 import { useState } from "react";
 import { discoverCompanies, removeCompany, setCompanyStatus, type CompaniesResponse, type Company } from "@/lib/api";
 import { companiesQuery, requireSetup, showError } from "@/lib/queries";
@@ -62,7 +62,7 @@ function CompanyTile({ company: c, actions }: { company: Company; actions: React
   return <article className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover">
     <div className="flex items-start gap-3"><CompanyLogo company={c.name} logo_url={c.logo_url} /><div className="min-w-0"><h3 className="truncate font-extrabold">{c.name}</h3>{c.board_url ? <a href={c.board_url} target="_blank" rel="noreferrer" className="text-xs font-semibold text-primary hover:underline">{c.board_name ?? "Job board"}</a> : <span className="text-xs text-muted-foreground">{c.board_name ?? "No job board"}</span>}</div></div>
     <p className="mt-3 line-clamp-3 flex-1 text-sm leading-6 text-muted-foreground">{c.why_it_fits}</p>
-    <div className="mt-3 flex flex-wrap gap-2"><span className={cn("rounded-full px-2.5 py-1 text-xs font-bold", c.open_roles > 0 ? "bg-fit-blue-soft text-fit-blue" : "bg-fit-gray-soft text-fit-gray")}>{c.open_roles} {c.open_roles === 1 ? "role" : "roles"} for you</span>{c.known_people > 0 && <span className="rounded-full bg-violet-soft px-2.5 py-1 text-xs font-bold text-violet">You know {c.known_people}</span>}</div>
+    <div className="mt-3 flex flex-wrap gap-2">{c.open_roles > 0 && c.company_id ? <Link to="/" search={{ company: c.company_id, name: c.name }} className="group inline-flex items-center gap-1 rounded-full bg-fit-blue-soft px-2.5 py-1 text-xs font-bold text-fit-blue transition hover:bg-fit-blue hover:text-primary-foreground">{c.open_roles} {c.open_roles === 1 ? "role" : "roles"} for you<ArrowRight className="size-3 transition group-hover:translate-x-0.5" /></Link> : <span className="rounded-full bg-fit-gray-soft px-2.5 py-1 text-xs font-bold text-fit-gray">{c.open_roles} {c.open_roles === 1 ? "role" : "roles"} for you</span>}{c.known_people > 0 && <span className="rounded-full bg-violet-soft px-2.5 py-1 text-xs font-bold text-violet">You know {c.known_people}</span>}</div>
     <div className="mt-4 flex gap-2 border-t border-border pt-4">{actions}</div>
   </article>;
 }
