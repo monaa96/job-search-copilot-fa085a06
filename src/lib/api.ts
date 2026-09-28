@@ -23,8 +23,8 @@ export type * from "./mockData";
 // ---------------------------------------------------------------------------
 // Configuration. Flip USE_MOCK to false to talk to the real API.
 // ---------------------------------------------------------------------------
-export const API_BASE_URL = "https://job-search-copilot-api.onrender.com";
-export const USE_MOCK = true;
+export const API_BASE_URL = "https://job-search-copilot-nxwm.onrender.com";
+export const USE_MOCK = false;
 
 const TOKEN_KEY = "jsc_token";
 const isBrowser = () => typeof window !== "undefined";
@@ -203,14 +203,14 @@ export async function addTitleToSearch(id: number, title: string): Promise<Searc
 }
 export async function refreshRoles(onLog?: LogHandler): Promise<{ summary: string }> {
   if (!USE_MOCK) return runJob(() => request("/api/roles/refresh", json("POST")), onLog);
-  return mockJob(["Ramp: 158 open jobs", "Plaid: 94 open jobs", "Modern Treasury: 31 open jobs", "Mercury: 47 open jobs", "Anthropic: 212 open jobs", "Checking fit for 12 new jobs…", "Scored 12 jobs"], () => { me.last_scan = new Date().toISOString(); return { summary: "No new roles above your minimum score since this morning." }; }, 5000, onLog);
+  return mockJob(["Ramp: 158 open jobs", "Plaid: 94 open jobs", "Modern Treasury: 31 open jobs", "Mercury: 47 open jobs", "Anthropic: 212 open jobs", "Checking fit for 12 new jobs…", "Scored 12 jobs"], () => { me.last_scan = `${new Date().toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · 0 new roles`; return { summary: "No new roles above your minimum score since this morning." }; }, 5000, onLog);
 }
 export async function findRoles(onLog?: LogHandler): Promise<{ summary: string }> {
   if (!USE_MOCK) return runJob(() => request("/api/roles/find", json("POST")), onLog);
   return mockJob(["Reading your resume and search preferences…", "Looking for companies that match you…", "Found 8 companies with job boards", "Ramp: 158 open jobs", "Plaid: 94 open jobs", "Modern Treasury: 31 open jobs", "Mercury: 47 open jobs", "Anthropic: 212 open jobs", "Filtering by your titles and locations…", "Checking fit for 23 jobs…", "Done: 8 roles ranked for you"], () => {
     me.onboarding = { has_resume: true, has_search: true, has_companies: true };
     if (companies.watching.length === 0) companies = structuredClone(mockCompanies);
-    me.last_scan = new Date().toISOString();
+    me.last_scan = `${new Date().toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · 0 new roles`;
     return { summary: "8 roles found across 5 companies" };
   }, 9000, onLog);
 }

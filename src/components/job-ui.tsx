@@ -1,3 +1,4 @@
+import { formatShortDate } from "@/lib/utils";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearToken } from "@/lib/api";
@@ -83,7 +84,7 @@ export function RoleCard({ role, onStatus }: { role: RoleSummary; onStatus: (sta
       <CompanyLogo company={role.company} logo_url={role.logo_url} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0"><h2 className="text-base font-bold text-foreground sm:text-lg">{role.title}</h2><p className="mt-1 text-sm text-muted-foreground">{role.company} · {role.location}{role.posted_at ? ` · Posted ${new Date(`${role.posted_at}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</p></div>
+          <div className="min-w-0"><h2 className="text-base font-bold text-foreground sm:text-lg">{role.title}</h2><p className="mt-1 text-sm text-muted-foreground">{role.company} · {role.location}{role.posted_at ? ` · Posted ${formatShortDate(role.posted_at)}` : ""}</p></div>
           <FitBadge score={role.fit_score} label={role.fit_label} color={role.fit_color} />
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">{role.known_people > 0 && <span className="rounded-full bg-violet-soft px-2.5 py-1 text-xs font-semibold text-violet">You know {role.known_people} {role.known_people === 1 ? "person" : "people"} here</span>}{role.has_plan && <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">Plan ready</span>}</div>

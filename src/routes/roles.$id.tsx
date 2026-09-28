@@ -1,3 +1,4 @@
+import { formatShortDate } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, BookOpenCheck, Check, Clipboard, FileText, MessageSquare, PenLine, Send, UserRoundCheck } from "lucide-react";
@@ -63,7 +64,7 @@ function RolePage() {
     <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary"><ArrowLeft className="size-4" />All roles</Link>
     <section className={cn("mt-5 rounded-xl border border-l-4 border-border bg-card p-5 shadow-card", stripeFor(data.role.fit_color))}>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex gap-4"><CompanyLogo company={data.role.company} logo_url={data.role.logo_url} size="lg" /><div><FitBadge score={data.role.fit_score} label={data.role.fit_label} color={data.role.fit_color} /><h1 className="mt-3 text-2xl font-extrabold tracking-normal text-foreground sm:text-4xl">{data.role.title}</h1><p className="mt-2 text-sm text-muted-foreground">{data.role.company} · {data.role.location}{data.role.posted_at ? ` · Posted ${new Date(`${data.role.posted_at}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</p></div></div>
+        <div className="flex gap-4"><CompanyLogo company={data.role.company} logo_url={data.role.logo_url} size="lg" /><div><FitBadge score={data.role.fit_score} label={data.role.fit_label} color={data.role.fit_color} /><h1 className="mt-3 text-2xl font-extrabold tracking-normal text-foreground sm:text-4xl">{data.role.title}</h1><p className="mt-2 text-sm text-muted-foreground">{data.role.company} · {data.role.location}{data.role.posted_at ? ` · Posted ${formatShortDate(data.role.posted_at)}` : ""}</p></div></div>
         <div className="flex flex-wrap gap-2"><Button asChild variant="secondary"><a href={data.role.url} target="_blank" rel="noreferrer">View posting</a></Button><Button variant={data.role.status === "saved" ? "secondary" : "primary"} onClick={() => saveMutation.mutate()}>{data.role.status === "saved" ? "Saved" : "Save"}</Button></div>
       </div>
     </section>
