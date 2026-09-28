@@ -26,7 +26,8 @@ function GoogleMark() {
 
 function WelcomePage() {
   const navigate = useNavigate();
-  const { error } = Route.useSearch();
+  // Sign-in errors arrive as ?error=… (set by /auth/callback).
+  const [error] = useState(() => new URLSearchParams(window.location.search).get("error"));
   const signIn = () => {
     if (USE_MOCK) { setToken("mock-token"); navigate({ to: "/" }); return; }
     window.location.href = signInUrl();
