@@ -242,7 +242,7 @@ export async function addCompany(name: string, careers_url?: string): Promise<Co
   if (!USE_MOCK) return request("/api/companies", json("POST", { name, careers_url: careers_url || undefined }));
   await pause(900);
   if (/acme|test/i.test(name) && !careers_url) throw new ApiError(`We couldn't find a job board for ${name}. Try adding its careers page URL.`, 404);
-  const company: Company = { id: Date.now(), name, logo_url: null, board_name: "Ashby job board", board_url: careers_url || null, why_it_fits: "Added by you.", open_roles: 0, known_people: 0 };
+  const company: Company = { id: Date.now(), company_id: null, name, logo_url: null, board_name: "Ashby job board", board_url: careers_url || null, why_it_fits: "Added by you.", open_roles: 0, known_people: 0 };
   companies.watching.unshift(company);
   me.onboarding.has_companies = true;
   return structuredClone(company);
