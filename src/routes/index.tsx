@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { keepPreviousData, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { RefreshCw, Users, X } from "lucide-react";
 import { ConnectionsDialog } from "@/components/connections-ui";
@@ -21,6 +23,7 @@ const selectClass = "h-10 rounded-lg border border-border bg-card px-3 pr-8 text
 
 export const Route = createFileRoute("/")({
   ssr: false,
+  validateSearch: zodValidator(z.object({ company: fallback(z.number().optional(), undefined), name: fallback(z.string().optional(), undefined) })),
   beforeLoad: requireSetup,
   loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(meQuery), context.queryClient.ensureQueryData(rolesQuery({ postedWithin: readDate() || null, sort: readSort() }))]),
   head: () => ({
@@ -37,7 +40,12 @@ export const Route = createFileRoute("/")({
 });
 
 function RolesPage() {
-  const [view, setView] = useState<RoleView>("best");
+  const { company, name } = Route.useSearch();
+  const navigate = useNavigate({ from: "/" });
+  const companyName = name || "this company";
+  const clearCompany = () => navigate({ search: {} });
+  const [view, setView] = useState<RoleView>(company ? "all" : "best");
+  useEffect(() => { if (company) setView("all"); }, [company]);
   const [refreshMessage, setRefreshMessage] = useState("");
   const [bannerHidden, setBannerHidden] = useState(true);
   const [importOpen, setImportOpen] = useState(false);
@@ -50,7 +58,7 @@ function RolesPage() {
   const [sort, setSortState] = useState<RoleSort>(readSort);
   const setPostedWithin = (n: number) => { localStorage.setItem(DATE_KEY, String(n)); setPostedWithinState(n); };
   const setSort = (v: RoleSort) => { localStorage.setItem(SORT_KEY, v); setSortState(v); };
-  const rolesResult = useQuery({ ...rolesQuery({ postedWithin: postedWithin || null, sort }), placeholderData: keepPreviousData });
+  const rolesResult = useQuery({ ...rolesQuery({ postedWithin: postedWithin || null, sort, companyId: company ?? null }), placeholderData: keepPreviousData });
   const isFetching = rolesResult.isFetching;
   const data = rolesResult.data ?? { stats: { strong_count: 0, saved_count: 0, companies_watched: 0, min_score: 60 }, roles: [] };
   const statusMutation = useMutation({
@@ -95,6 +103,7 @@ function RolesPage() {
       <div className="grid flex-1 grid-cols-3 gap-1" role="tablist" aria-label="Role views">
         {tabs.map((tab) => <button key={tab.value} type="button" onClick={() => setView(tab.value)} className={cn("h-10 rounded-lg text-sm font-bold text-muted-foreground transition", view === tab.value && "bg-primary text-primary-foreground")}>{tab.label}</button>)}
       </div>
+      {company && <button type="button" onClick={clearCompany} aria-label={`Clear ${companyName} filter`} className="inline-flex h-10 max-w-full items-center gap-1.5 self-start rounded-full border border-primary/30 bg-primary/10 px-3 text-sm font-bold text-primary transition hover:bg-primary/15 md:self-auto"><span className="truncate">{companyName}</span><X className="size-4 shrink-0" /></button>}
       <div className="grid grid-cols-2 gap-2 md:flex">
         <label className="grid gap-0.5 md:flex md:items-center md:gap-2"><span className="sr-only md:not-sr-only md:text-xs md:font-semibold md:text-muted-foreground">Date posted</span><select aria-label="Date posted" className={selectClass} value={postedWithin} onChange={(e) => setPostedWithin(Number(e.target.value))}>{dateOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>
         <label className="grid gap-0.5 md:flex md:items-center md:gap-2"><span className="sr-only md:not-sr-only md:text-xs md:font-semibold md:text-muted-foreground">Sort by</span><select aria-label="Sort by" className={selectClass} value={sort} onChange={(e) => setSort(e.target.value as RoleSort)}><option value="fit">Best fit</option><option value="recent">Most recent</option></select></label>
@@ -108,8 +117,9 @@ function RolesPage() {
     <ConnectionsDialog open={importOpen} onOpenChange={setImportOpen} onUploaded={() => queryClient.invalidateQueries({ queryKey: ["roles"] })} />
 
     <section className="mt-5 grid gap-4" aria-live="polite">
-      {roles.length === 0 && postedWithin > 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">No roles posted in the {dateOptions.find((o) => o.value === postedWithin)?.label.toLowerCase()}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Your date filter is hiding older roles{view === "saved" ? " you saved" : ""}.</p><Button className="mt-5" variant="secondary" onClick={() => setPostedWithin(0)}>Show any time</Button></div>}
-      {roles.length === 0 && postedWithin === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">{data.roles.length === 0 ? "No roles yet" : view === "saved" ? "Nothing saved yet" : "No roles in this view"}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{data.roles.length === 0 ? "Your watched companies are checked every morning. You can also check right now and new roles will be scored against your resume." : view === "saved" ? "Bookmark a role to keep it here." : "Try another view or check for new roles."}</p>{view !== "saved" && <Button className="mt-5" onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>}</div>}
+      {roles.length === 0 && company && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">No open roles at {companyName} match your search right now</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Clear the company filter to see roles from all your companies.</p><Button className="mt-5" variant="secondary" onClick={clearCompany}>Clear filter</Button></div>}
+      {roles.length === 0 && !company && postedWithin > 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">No roles posted in the {dateOptions.find((o) => o.value === postedWithin)?.label.toLowerCase()}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Your date filter is hiding older roles{view === "saved" ? " you saved" : ""}.</p><Button className="mt-5" variant="secondary" onClick={() => setPostedWithin(0)}>Show any time</Button></div>}
+      {roles.length === 0 && !company && postedWithin === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">{data.roles.length === 0 ? "No roles yet" : view === "saved" ? "Nothing saved yet" : "No roles in this view"}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{data.roles.length === 0 ? "Your watched companies are checked every morning. You can also check right now and new roles will be scored against your resume." : view === "saved" ? "Bookmark a role to keep it here." : "Try another view or check for new roles."}</p>{view !== "saved" && <Button className="mt-5" onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>}</div>}
       {roles.map((role) => <RoleCard key={role.id} role={role} onStatus={(status) => statusMutation.mutate({ id: role.id, status })} />)}
       {isFetching && <p className="text-center text-sm font-medium text-muted-foreground">Updating roles…</p>}
     </section>
