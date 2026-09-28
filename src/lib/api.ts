@@ -47,8 +47,8 @@ export async function getMe(): Promise<Me> { return USE_MOCK ? mock(mockMe) : re
 export async function getRoles(view: "best" | "saved" | "all" = "best"): Promise<RolesResponse> {
   if (!USE_MOCK) return request(`/api/roles?view=${view}`);
   await pause();
-  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= mockSearch.min_score)));
-  return { stats: { strong_count: roles.filter((role) => role.fit_score >= mockSearch.min_score && role.status !== "dismissed").length, saved_count: roles.filter((role) => role.status === "saved").length, companies_watched: 5, min_score: mockSearch.min_score }, roles: structuredClone(visible) };
+  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= search.min_score)));
+  return { stats: { strong_count: roles.filter((role) => role.fit_score >= search.min_score && role.status !== "dismissed").length, saved_count: roles.filter((role) => role.status === "saved").length, companies_watched: 5, min_score: search.min_score }, roles: structuredClone(visible) };
 }
 export async function getRole(id: number): Promise<RoleDetail> { if (!USE_MOCK) return request(`/api/roles/${id}`); const detail = details[id]; if (!detail) throw new Error("Role not found"); return mock(detail); }
 export async function setRoleStatus(id: number, status: RoleSummary["status"]): Promise<RoleSummary> { if (!USE_MOCK) return request(`/api/roles/${id}/status`, { method: "POST", body: JSON.stringify({ status }) }); await pause(220); roles = roles.map((role) => role.id === id ? { ...role, status } : role); if (details[id]) details[id] = { ...details[id], role: { ...details[id].role, status } }; const role = roles.find((item) => item.id === id); if (!role) throw new Error("Role not found"); return structuredClone(role); }
