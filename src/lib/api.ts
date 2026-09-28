@@ -146,17 +146,18 @@ export async function getMe(): Promise<Me> {
   return mock(me, 250);
 }
 export type RoleSort = "fit" | "recent";
-export type RoleFilters = { postedWithin?: number | null | undefined; sort?: RoleSort | undefined };
+export type RoleFilters = { postedWithin?: number | null | undefined; sort?: RoleSort | undefined; companyId?: number | null | undefined };
 export async function getRoles(view: "best" | "saved" | "all" = "best", filters: RoleFilters = {}): Promise<RolesResponse> {
-  const { postedWithin, sort = "fit" } = filters;
+  const { postedWithin, sort = "fit", companyId } = filters;
   if (!USE_MOCK) {
     const qs = new URLSearchParams({ view, sort });
     if (postedWithin) qs.set("posted_within", String(postedWithin));
+    if (companyId) qs.set("company_id", String(companyId));
     return request(`/api/roles?${qs}`);
   }
   await pause();
   const cutoff = postedWithin ? Date.now() - postedWithin * 86_400_000 : null;
-  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= search.min_score)) && (cutoff === null || (role.posted_at !== null && new Date(role.posted_at).getTime() >= cutoff)));
+  const visible = roles.filter((role) => role.status !== "dismissed" && (view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= search.min_score)) && (!companyId || role.company_id === companyId) && (cutoff === null || (role.posted_at !== null && new Date(role.posted_at).getTime() >= cutoff)));
   visible.sort((a, b) => sort === "recent" ? (b.posted_at ? Date.parse(b.posted_at) : 0) - (a.posted_at ? Date.parse(a.posted_at) : 0) : b.fit_score - a.fit_score);
   return { stats: { strong_count: roles.filter((role) => role.fit_score >= search.min_score && role.status !== "dismissed").length, saved_count: roles.filter((role) => role.status === "saved").length, companies_watched: companies.watching.length, min_score: search.min_score }, roles: structuredClone(visible) };
 }
@@ -229,8 +230,8 @@ export async function discoverCompanies(onLog?: LogHandler): Promise<CompaniesRe
   bump("discoveries");
   return mockJob(["Thinking about companies that fit your background…", "Considering 24 candidates", "Adyen: Greenhouse job board found", "Marqeta: Ashby job board found", "Checking open roles…"], () => {
     const extra: Company[] = [
-      { id: 31, name: "Adyen", logo_url: "https://www.google.com/s2/favicons?domain=adyen.com&sz=128", board_name: "Greenhouse job board", board_url: "https://careers.adyen.com", why_it_fits: "Global payments platform with a large product org in New York; your API platform work maps to their merchant integrations team.", open_roles: 2, known_people: 0 },
-      { id: 32, name: "Marqeta", logo_url: "https://www.google.com/s2/favicons?domain=marqeta.com&sz=128", board_name: "Ashby job board", board_url: "https://www.marqeta.com/company/careers", why_it_fits: "Card-issuing platform whose customers are developers. Your integration-time story is directly relevant.", open_roles: 1, known_people: 1 },
+      { id: 31, company_id: null, name: "Adyen", logo_url: "https://www.google.com/s2/favicons?domain=adyen.com&sz=128", board_name: "Greenhouse job board", board_url: "https://careers.adyen.com", why_it_fits: "Global payments platform with a large product org in New York; your API platform work maps to their merchant integrations team.", open_roles: 2, known_people: 0 },
+      { id: 32, company_id: null, name: "Marqeta", logo_url: "https://www.google.com/s2/favicons?domain=marqeta.com&sz=128", board_name: "Ashby job board", board_url: "https://www.marqeta.com/company/careers", why_it_fits: "Card-issuing platform whose customers are developers. Your integration-time story is directly relevant.", open_roles: 1, known_people: 1 },
     ];
     const known = new Set([...companies.suggested, ...companies.watching].map((c) => c.id));
     companies.suggested.push(...extra.filter((c) => !known.has(c.id)));
