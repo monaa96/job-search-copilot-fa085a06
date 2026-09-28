@@ -1,6 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { z } from "zod";
 import { keepPreviousData, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { RefreshCw, Users, X } from "lucide-react";
 import { ConnectionsDialog } from "@/components/connections-ui";
@@ -23,7 +21,7 @@ const selectClass = "h-10 rounded-lg border border-border bg-card px-3 pr-8 text
 
 export const Route = createFileRoute("/")({
   ssr: false,
-  validateSearch: zodValidator(z.object({ company: fallback(z.number().optional(), undefined), name: fallback(z.string().optional(), undefined) })),
+  validateSearch: (search: Record<string, unknown>): { company?: number; name?: string } => { const c = Number(search.company); return { ...(Number.isFinite(c) && c > 0 ? { company: c } : {}), ...(typeof search.name === "string" && search.name ? { name: search.name } : {}) }; },
   beforeLoad: requireSetup,
   loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(meQuery), context.queryClient.ensureQueryData(rolesQuery({ postedWithin: readDate() || null, sort: readSort() }))]),
   head: () => ({
