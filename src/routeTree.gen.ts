@@ -12,8 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalysesRouteImport } from './routes/analyses'
 import { Route as CompaniesRouteImport } from './routes/companies'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as RolesIdRouteImport } from './routes/roles.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,14 +35,34 @@ const CompaniesRoute = CompaniesRouteImport.update({
   path: '/companies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RolesIdRoute = RolesIdRouteImport.update({
@@ -51,16 +75,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
+  '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
   '/skills': typeof SkillsRoute
+  '/welcome': typeof WelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/roles/$id': typeof RolesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
+  '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
   '/skills': typeof SkillsRoute
+  '/welcome': typeof WelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/roles/$id': typeof RolesIdRoute
 }
 export interface FileRoutesById {
@@ -68,23 +100,50 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
+  '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
   '/skills': typeof SkillsRoute
+  '/welcome': typeof WelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/roles/$id': typeof RolesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/analyses' | '/companies' | '/settings' | '/skills' | '/roles/$id'
+    | '/'
+    | '/analyses'
+    | '/companies'
+    | '/privacy'
+    | '/settings'
+    | '/setup'
+    | '/skills'
+    | '/welcome'
+    | '/auth/callback'
+    | '/roles/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analyses' | '/companies' | '/settings' | '/skills' | '/roles/$id'
+  to:
+    | '/'
+    | '/analyses'
+    | '/companies'
+    | '/privacy'
+    | '/settings'
+    | '/setup'
+    | '/skills'
+    | '/welcome'
+    | '/auth/callback'
+    | '/roles/$id'
   id:
     | '__root__'
     | '/'
     | '/analyses'
     | '/companies'
+    | '/privacy'
     | '/settings'
+    | '/setup'
     | '/skills'
+    | '/welcome'
+    | '/auth/callback'
     | '/roles/$id'
   fileRoutesById: FileRoutesById
 }
@@ -92,8 +151,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysesRoute: typeof AnalysesRoute
   CompaniesRoute: typeof CompaniesRoute
+  PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
+  SetupRoute: typeof SetupRoute
   SkillsRoute: typeof SkillsRoute
+  WelcomeRoute: typeof WelcomeRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   RolesIdRoute: typeof RolesIdRoute
 }
 
@@ -120,6 +183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompaniesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -127,11 +197,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/skills': {
       id: '/skills'
       path: '/skills'
       fullPath: '/skills'
       preLoaderRoute: typeof SkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/roles/$id': {
@@ -148,8 +239,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysesRoute: AnalysesRoute,
   CompaniesRoute: CompaniesRoute,
+  PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
+  SetupRoute: SetupRoute,
   SkillsRoute: SkillsRoute,
+  WelcomeRoute: WelcomeRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   RolesIdRoute: RolesIdRoute,
 }
 export const routeTree = rootRouteImport
