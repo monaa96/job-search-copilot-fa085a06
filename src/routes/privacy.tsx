@@ -41,7 +41,7 @@ function PrivacyPage() {
         <><strong>Google:</strong> provides sign-in, and serves the company logos shown in the app (your browser loads these images from Google).</>,
       ]} />
       <H>Retention and deletion</H>
-      <P>Your information is kept until you delete it. You can permanently delete your resume, preferences, tracked companies, jobs and analyses at any time under Settings → Delete my data, and your imported connections on their own under Settings → LinkedIn connections. Deletion is immediate and can't be undone.</P>
+      <P>Your information is kept until you delete it. You can permanently delete your resume, preferences, tracked companies, jobs and analyses at any time under Profile → Delete my data, and your imported connections on their own under Profile → LinkedIn connections. Deletion is immediate and can't be undone.</P>
       <H>Security</H>
       <P>Data is transmitted over encrypted connections (HTTPS/TLS) and stored with access restricted to the app. No system is perfectly secure; please don't upload information you're not comfortable sharing with the services above.</P>
       <H>Children</H>

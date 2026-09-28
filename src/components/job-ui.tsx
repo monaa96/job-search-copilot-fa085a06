@@ -3,7 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearToken } from "@/lib/api";
 import { meQuery } from "@/lib/queries";
-import { BarChart3, Bookmark, BriefcaseBusiness, Building2, ChevronDown, FileSearch, Menu, Settings, Sparkles, Target, X } from "lucide-react";
+import { BarChart3, Bookmark, BriefcaseBusiness, Building2, ChevronDown, FileSearch, Menu, Sparkles, Target, UserRound, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { FitColor, RoleSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ const navItems = [
   { to: "/skills", label: "Skills", icon: Target },
   { to: "/companies", label: "Companies", icon: Building2 },
   { to: "/analyses", label: "Analyses", icon: BarChart3 },
+  { to: "/profile", label: "Profile", icon: UserRound },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -52,8 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
             {userOpen && <div className="absolute right-0 top-11 w-52 rounded-lg border border-border bg-card p-1.5 shadow-card">
               <div className="border-b border-border px-3 py-2"><p className="truncate text-sm font-semibold">{me?.name}</p><p className="truncate text-xs text-muted-foreground">{me?.email}</p></div>
-              <Link to="/settings" className="mt-1 flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"><Settings className="size-4" />Settings</Link>
-              <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted" type="button" onClick={signOut}>Sign out</button>
+              <button className="mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted" type="button" onClick={signOut}>Sign out</button>
             </div>}
           </div>
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen((value) => !value)} aria-label="Toggle navigation">{mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}</Button>

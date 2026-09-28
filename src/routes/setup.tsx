@@ -53,7 +53,7 @@ function SetupPage() {
         </>}
         {step === 1 && <>
           <h1 className="text-2xl font-extrabold">What are you looking for?</h1>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">You can change any of this later in Settings.</p>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">You can change any of this later in your Profile.</p>
           <div className="mt-6"><SearchForm initial={initial} busy={busy} submitLabel="Continue" onSubmit={(profile) => wrap(() => saveSearch(profile), () => setStep(2))} /></div>
         </>}
         {step === 2 && <>
