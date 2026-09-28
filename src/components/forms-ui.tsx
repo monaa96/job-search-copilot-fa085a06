@@ -48,14 +48,20 @@ export function ResumeInput({ onSubmit, busy, submitLabel = "Upload resume" }: {
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [drag, setDrag] = useState(false);
-  const pick = (f?: File | null) => { if (f && /\.(pdf|txt)$/i.test(f.name)) { setFile(f); setText(""); } };
+  const [error, setError] = useState("");
+  const pick = (f?: File | null) => {
+    if (!f) return;
+    if (/\.(pdf|docx|txt|md)$/i.test(f.name)) { setFile(f); setText(""); setError(""); }
+    else setError("That file type isn't supported. Please choose a PDF, Word (.docx), TXT or MD file.");
+  };
   return <div className="grid gap-4">
     <label onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={(e) => { e.preventDefault(); setDrag(false); pick(e.dataTransfer.files[0]); }} className={cn("flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-background/60 px-4 py-8 text-center transition hover:border-primary", drag && "border-primary bg-primary-soft/50")}>
       <FileUp className="size-7 text-primary" />
       <span className="mt-3 text-sm font-bold">{file ? file.name : "Drop your resume here, or click to choose"}</span>
-      <span className="mt-1 text-xs text-muted-foreground">PDF or TXT</span>
-      <input type="file" accept=".pdf,.txt,application/pdf,text/plain" className="sr-only" onChange={(e) => pick(e.target.files?.[0])} />
+      <span className="mt-1 text-xs text-muted-foreground">PDF, Word or text file</span>
+      <input type="file" accept=".pdf,.docx,.txt,.md,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown" className="sr-only" onChange={(e) => pick(e.target.files?.[0])} />
     </label>
+    {error && <p className="rounded-lg bg-destructive-soft px-3 py-2 text-sm text-destructive">{error}</p>}
     <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground"><span className="h-px flex-1 bg-border" />or paste it<span className="h-px flex-1 bg-border" /></div>
     <textarea rows={5} className={textareaClass} value={text} onChange={(e) => { setText(e.target.value); if (e.target.value) setFile(null); }} placeholder="Paste your resume text…" />
     <div><Button onClick={() => { if (file) onSubmit(file); else if (text.trim()) onSubmit(text.trim()); }} disabled={busy || (!file && !text.trim())}>{busy ? "Uploading…" : submitLabel}</Button></div>
