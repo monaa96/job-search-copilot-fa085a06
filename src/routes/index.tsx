@@ -52,7 +52,8 @@ function RolesPage() {
       <div>
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">Your daily shortlist</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-normal text-foreground sm:text-5xl">Roles for you</h1>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">Updated {updated} · 6 new roles</p>
+        <p className="mt-3 text-base font-semibold text-foreground">Don't just find jobs. Close the gap.</p>
+        <p className="mt-1 max-w-2xl text-sm leading-7 text-muted-foreground">Updated {updated} · 6 new roles</p>
       </div>
       <div className="flex flex-col items-start gap-2 sm:items-end">
         <Button onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>

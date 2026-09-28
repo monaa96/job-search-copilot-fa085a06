@@ -27,6 +27,7 @@ function RolePage() {
   const { data } = useSuspenseQuery(roleQuery(roleId));
   const [tab, setTab] = useState<"adjacent" | "resume" | "analysis">("adjacent");
   const [drafts, setDrafts] = useState<Record<number, string>>({});
+  const [draftingIndex, setDraftingIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState<number | null>(null);
   const [planProgress, setPlanProgress] = useState(0);
 
@@ -38,8 +39,17 @@ function RolePage() {
     if (previous) queryClient.setQueryData<RoleDetail>(["role", roleId], { ...previous, plan: previous.plan.map((step) => step.key === key ? { ...step, done } : step) });
     return { previous };
   }, onError: (_error, _variables, context) => { if (context?.previous) queryClient.setQueryData(["role", roleId], context.previous); }, onSettled: () => queryClient.invalidateQueries({ queryKey: ["role", roleId] }) });
-  const draftMutation = useMutation({ mutationFn: (person_index: number) => draftMessage(roleId, person_index), onSuccess: (result, personIndex) => setDrafts((current) => ({ ...current, [personIndex]: result.message })) });
   const addTitleMutation = useMutation({ mutationFn: (title: string) => addTitleToSearch(roleId, title) });
+
+  const handleDraft = async (personIndex: number) => {
+    setDraftingIndex(personIndex);
+    try {
+      const result = await draftMessage(roleId, personIndex);
+      setDrafts((current) => ({ ...current, [personIndex]: result.message }));
+    } finally {
+      setDraftingIndex(null);
+    }
+  };
 
   const doneCount = data.plan.filter((step) => step.done).length;
   const progressPercent = data.plan.length ? Math.round((doneCount / data.plan.length) * 100) : 0;
@@ -71,7 +81,7 @@ function RolePage() {
         </div>
         <aside className="grid content-start gap-5">
           <AtAGlance analysis={data.analysis} />
-          <PeopleCard detail={data} drafts={drafts} copied={copied} onDraft={(index) => draftMutation.mutate(index)} draftingIndex={draftMutation.variables ?? null} onCopy={async (index, message) => { await navigator.clipboard.writeText(message); setCopied(index); }} />
+          <PeopleCard detail={data} drafts={drafts} copied={copied} onDraft={handleDraft} draftingIndex={draftingIndex} onCopy={async (index, message) => { await navigator.clipboard.writeText(message); setCopied(index); }} />
         </aside>
       </section>
       <section className="mt-6 rounded-xl border border-border bg-card p-5 shadow-card">
