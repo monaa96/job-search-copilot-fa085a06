@@ -10,10 +10,10 @@ import { cn } from "@/lib/utils";
 type RoleView = "best" | "saved" | "all";
 
 const meQuery = queryOptions({ queryKey: ["me"], queryFn: getMe });
-const rolesQuery = (view: RoleView) => queryOptions({ queryKey: ["roles", view], queryFn: () => getRoles(view) });
+const rolesQuery = queryOptions({ queryKey: ["roles"], queryFn: () => getRoles("all") });
 
 export const Route = createFileRoute("/")({
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(meQuery), context.queryClient.ensureQueryData(rolesQuery("best"))]),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(meQuery), context.queryClient.ensureQueryData(rolesQuery)]),
   head: () => ({
     meta: [
       { title: "Roles for You — Job Search Copilot" },
@@ -32,7 +32,7 @@ function RolesPage() {
   const [refreshMessage, setRefreshMessage] = useState("");
   const queryClient = useQueryClient();
   const { data: me } = useSuspenseQuery(meQuery);
-  const { data, isFetching } = useSuspenseQuery(rolesQuery(view));
+  const { data, isFetching } = useSuspenseQuery(rolesQuery);
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: RoleSummary["status"] }) => setRoleStatus(id, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["roles"] }),
@@ -43,7 +43,7 @@ function RolesPage() {
     onSuccess: async (result) => { setRefreshMessage(result.summary); await queryClient.invalidateQueries({ queryKey: ["roles"] }); },
   });
   const updated = me.last_scan ? new Date(me.last_scan).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Not scanned yet";
-  const roles = data.roles;
+  const roles = data.roles.filter((role) => view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= data.stats.min_score));
   const stats = data.stats;
   const tabs: { value: RoleView; label: string }[] = useMemo(() => [{ value: "best", label: "Best matches" }, { value: "saved", label: "Saved" }, { value: "all", label: "All roles" }], []);
 
