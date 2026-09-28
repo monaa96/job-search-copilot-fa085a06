@@ -1,9 +1,16 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { Building2, ListChecks, Map, Sparkles } from "lucide-react";
-import { setToken, signInUrl, USE_MOCK } from "@/lib/api";
+import { getToken, setToken, signInUrl, USE_MOCK } from "@/lib/api";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/welcome")({
+  ssr: false,
+  validateSearch: (search: Record<string, unknown>) => ({ error: typeof search.error === "string" ? search.error : undefined }),
+  beforeLoad: () => {
+    // A signed-in visitor landing here should go straight into the app; the
+    // "/" guard sends them to /setup if they still need to finish onboarding.
+    if (!USE_MOCK && getToken()) throw redirect({ to: "/" });
+  },
   head: () => pageHead("Job Search Copilot — Find the roles you're actually a fit for", "Job Search Copilot scans matching companies daily, ranks new openings against your resume, and shows you how to close the gap."),
   component: WelcomePage,
 });
