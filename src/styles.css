@@ -185,3 +185,8 @@
     letter-spacing: 0;
   }
 }
+
+@utility bg-hero {
+  background-color: var(--primary);
+  background-image: linear-gradient(120deg, var(--primary) 0%, var(--primary) 35%, var(--violet) 100%);
+}

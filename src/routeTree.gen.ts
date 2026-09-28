@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalysesRouteImport } from './routes/analyses'
 import { Route as CompaniesRouteImport } from './routes/companies'
+import { Route as MatchRouteImport } from './routes/match'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SetupRouteImport } from './routes/setup'
@@ -33,6 +34,11 @@ const AnalysesRoute = AnalysesRouteImport.update({
 const CompaniesRoute = CompaniesRouteImport.update({
   id: '/companies',
   path: '/companies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchRoute = MatchRouteImport.update({
+  id: '/match',
+  path: '/match',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
+  '/match': typeof MatchRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
+  '/match': typeof MatchRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analyses': typeof AnalysesRoute
   '/companies': typeof CompaniesRoute
+  '/match': typeof MatchRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyses'
     | '/companies'
+    | '/match'
     | '/privacy'
     | '/settings'
     | '/setup'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyses'
     | '/companies'
+    | '/match'
     | '/privacy'
     | '/settings'
     | '/setup'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyses'
     | '/companies'
+    | '/match'
     | '/privacy'
     | '/settings'
     | '/setup'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysesRoute: typeof AnalysesRoute
   CompaniesRoute: typeof CompaniesRoute
+  MatchRoute: typeof MatchRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   SetupRoute: typeof SetupRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/companies'
       fullPath: '/companies'
       preLoaderRoute: typeof CompaniesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/match': {
+      id: '/match'
+      path: '/match'
+      fullPath: '/match'
+      preLoaderRoute: typeof MatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysesRoute: AnalysesRoute,
   CompaniesRoute: CompaniesRoute,
+  MatchRoute: MatchRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   SetupRoute: SetupRoute,
