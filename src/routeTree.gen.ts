@@ -14,6 +14,7 @@ import { Route as AnalysesRouteImport } from './routes/analyses'
 import { Route as CompaniesRouteImport } from './routes/companies'
 import { Route as MatchRouteImport } from './routes/match'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SkillsRouteImport } from './routes/skills'
@@ -44,6 +45,11 @@ const MatchRoute = MatchRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/companies': typeof CompaniesRoute
   '/match': typeof MatchRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
   '/skills': typeof SkillsRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/companies': typeof CompaniesRoute
   '/match': typeof MatchRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
   '/skills': typeof SkillsRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/companies': typeof CompaniesRoute
   '/match': typeof MatchRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
   '/skills': typeof SkillsRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/match'
     | '/privacy'
+    | '/profile'
     | '/settings'
     | '/setup'
     | '/skills'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/match'
     | '/privacy'
+    | '/profile'
     | '/settings'
     | '/setup'
     | '/skills'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/match'
     | '/privacy'
+    | '/profile'
     | '/settings'
     | '/setup'
     | '/skills'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   CompaniesRoute: typeof CompaniesRoute
   MatchRoute: typeof MatchRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
   SetupRoute: typeof SetupRoute
   SkillsRoute: typeof SkillsRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompaniesRoute: CompaniesRoute,
   MatchRoute: MatchRoute,
   PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
   SetupRoute: SetupRoute,
   SkillsRoute: SkillsRoute,
