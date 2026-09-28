@@ -26,7 +26,7 @@ export function ConnectionsInfo() {
 }
 
 /** Drag-and-drop CSV upload with inline errors. Refreshes the account after success. */
-export function ConnectionsUpload({ onUploaded }: { onUploaded?: (count: number) => void }) {
+export function ConnectionsUpload({ onUploaded }: { onUploaded?: ((count: number) => void) | undefined }) {
   const queryClient = useQueryClient();
   const [drag, setDrag] = useState(false);
   const [error, setError] = useState("");
@@ -58,7 +58,7 @@ export function connectionsStatus(count: number) {
 }
 
 /** Full card: status, info, upload, and delete link. */
-export function ConnectionsCard({ className, title = "LinkedIn connections", onUploaded }: { className?: string; title?: string; onUploaded?: (count: number) => void }) {
+export function ConnectionsCard({ className, title = "LinkedIn connections", onUploaded }: { className?: string; title?: string; onUploaded?: ((count: number) => void) | undefined }) {
   const { data: me } = useQuery(meQuery);
   const queryClient = useQueryClient();
   const [confirm, setConfirm] = useState(false);
@@ -77,7 +77,7 @@ export function ConnectionsCard({ className, title = "LinkedIn connections", onU
 }
 
 /** Dialog variant used from the Roles banner and role page. */
-export function ConnectionsDialog({ open, onOpenChange, onUploaded }: { open: boolean; onOpenChange: (open: boolean) => void; onUploaded?: (count: number) => void }) {
+export function ConnectionsDialog({ open, onOpenChange, onUploaded }: { open: boolean; onOpenChange: (open: boolean) => void; onUploaded?: ((count: number) => void) | undefined }) {
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
       <DialogHeader><DialogTitle>Import your LinkedIn connections</DialogTitle><DialogDescription className="sr-only">Upload the Connections.csv file from LinkedIn.</DialogDescription></DialogHeader>
