@@ -3,7 +3,7 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PageLoading, RoleCard } from "@/components/job-ui";
+import { RoleCard } from "@/components/job-ui";
 import { getMe, getRoles, refreshRoles, setRoleStatus, type RoleSummary } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
