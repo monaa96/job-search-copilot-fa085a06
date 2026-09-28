@@ -1,4 +1,7 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { clearToken } from "@/lib/api";
+import { meQuery } from "@/lib/queries";
 import { BarChart3, Bookmark, BriefcaseBusiness, Building2, ChevronDown, FileSearch, Menu, Settings, Sparkles, Target, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { FitColor, RoleSummary } from "@/lib/api";
@@ -7,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", label: "Roles", icon: BriefcaseBusiness },
-  { to: "/resume-match", label: "Resume match", icon: FileSearch },
+  { to: "/match", label: "Resume match", icon: FileSearch },
   { to: "/skills", label: "Skills", icon: Target },
   { to: "/companies", label: "Companies", icon: Building2 },
   { to: "/analyses", label: "Analyses", icon: BarChart3 },
@@ -18,6 +21,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [userOpen, setUserOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const path = useRouterState({ select: (state) => state.location.pathname });
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: me } = useQuery(meQuery);
+  const initials = me ? me.name.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase() : "";
+  const checks = me?.usage.fit_checks;
+  const signOut = () => { clearToken(); queryClient.clear(); navigate({ to: "/welcome" }); };
   useEffect(() => { setMobileOpen(false); setUserOpen(false); }, [path]);
   useEffect(() => {
     const close = (event: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(event.target as Node)) setUserOpen(false); };
@@ -35,15 +44,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           {navItems.map(({ to, label, icon: Icon }) => <Link key={to} to={to} className="flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-primary-soft text-primary" }} activeOptions={{ exact: to === "/" }}><Icon className="size-4" />{label}</Link>)}
         </nav>
         <div className="ml-auto flex items-center gap-2.5">
-          <div className="hidden items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground md:flex"><span className="size-1.5 rounded-full bg-fit-green" />8 of 20 checks</div>
+          <div className="hidden items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground md:flex"><span className={cn("size-1.5 rounded-full", checks && checks.used >= checks.limit ? "bg-fit-orange" : "bg-fit-green")} />{checks ? `${checks.used} of ${checks.limit} role scores today` : "Loading usage…"}</div>
           <div className="relative" ref={menuRef}>
             <Button variant="ghost" size="sm" onClick={() => setUserOpen((value) => !value)} aria-expanded={userOpen} aria-label="Open user menu" className="px-1.5">
-              <span className="grid size-8 place-items-center rounded-full bg-violet-soft font-bold text-violet">AM</span><ChevronDown className="hidden size-3.5 sm:block" />
+              <span className="grid size-8 place-items-center rounded-full bg-violet-soft font-bold text-violet">{initials}</span><ChevronDown className="hidden size-3.5 sm:block" />
             </Button>
             {userOpen && <div className="absolute right-0 top-11 w-52 rounded-lg border border-border bg-card p-1.5 shadow-card">
-              <div className="border-b border-border px-3 py-2"><p className="text-sm font-semibold">Alex Morgan</p><p className="text-xs text-muted-foreground">alex@example.com</p></div>
+              <div className="border-b border-border px-3 py-2"><p className="truncate text-sm font-semibold">{me?.name}</p><p className="truncate text-xs text-muted-foreground">{me?.email}</p></div>
               <Link to="/settings" className="mt-1 flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"><Settings className="size-4" />Settings</Link>
-              <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted" type="button">Sign out</button>
+              <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted" type="button" onClick={signOut}>Sign out</button>
             </div>}
           </div>
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen((value) => !value)} aria-label="Toggle navigation">{mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}</Button>
