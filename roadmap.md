@@ -5,4 +5,4 @@
 - [x] Build the role detail, plan, referrals, adjacent roles, resume suggestions, and analysis views.
 - [x] Add placeholder pages for the remaining navigation items.
 - [x] Verify dashboard, role plan, plan generation, message drafting, and mobile navigation.
-- [ ] Diagnose and fix the user-facing site load failure.
+- [x] Diagnose the user-facing site load failure and request a fresh public deployment.
