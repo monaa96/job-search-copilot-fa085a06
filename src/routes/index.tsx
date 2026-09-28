@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ function RolesPage() {
   const [refreshMessage, setRefreshMessage] = useState("");
   const queryClient = useQueryClient();
   const { data: me } = useSuspenseQuery(meQuery);
-  const { data, isFetching } = useQuery({ ...rolesQuery(view), placeholderData: (previous) => previous });
+  const { data, isFetching } = useSuspenseQuery(rolesQuery(view));
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: RoleSummary["status"] }) => setRoleStatus(id, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["roles"] }),
@@ -43,8 +43,8 @@ function RolesPage() {
     onSuccess: async (result) => { setRefreshMessage(result.summary); await queryClient.invalidateQueries({ queryKey: ["roles"] }); },
   });
   const updated = me.last_scan ? new Date(me.last_scan).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Not scanned yet";
-  const roles = data?.roles ?? [];
-  const stats = data?.stats;
+  const roles = data.roles;
+  const stats = data.stats;
   const tabs: { value: RoleView; label: string }[] = useMemo(() => [{ value: "best", label: "Best matches" }, { value: "saved", label: "Saved" }, { value: "all", label: "All roles" }], []);
 
   return <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -61,11 +61,11 @@ function RolesPage() {
       </div>
     </section>
 
-    {stats && <section className="mt-7 grid gap-4 md:grid-cols-3">
+    <section className="mt-7 grid gap-4 md:grid-cols-3">
       <StatCard label={`Roles at ${stats.min_score}+`} value={stats.strong_count} accent="bg-fit-blue" />
       <StatCard label="Saved" value={stats.saved_count} accent="bg-fit-green" />
       <StatCard label="Companies watched" value={stats.companies_watched} accent="bg-violet" />
-    </section>}
+    </section>
 
     <section className="mt-8 rounded-xl border border-border bg-card p-2 shadow-card">
       <div className="grid grid-cols-3 gap-1" role="tablist" aria-label="Role views">
@@ -74,10 +74,9 @@ function RolesPage() {
     </section>
 
     <section className="mt-5 grid gap-4" aria-live="polite">
-      {!data && <PageLoading />}
-      {data && roles.length === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">No roles here yet</h2><p className="mt-2 text-sm text-muted-foreground">Try another view or check for new roles.</p></div>}
+      {roles.length === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">No roles here yet</h2><p className="mt-2 text-sm text-muted-foreground">Try another view or check for new roles.</p></div>}
       {roles.map((role) => <RoleCard key={role.id} role={role} onStatus={(status) => statusMutation.mutate({ id: role.id, status })} />)}
-      {isFetching && data && <p className="text-center text-sm font-medium text-muted-foreground">Updating roles…</p>}
+      {isFetching && <p className="text-center text-sm font-medium text-muted-foreground">Updating roles…</p>}
     </section>
   </div>;
 }
