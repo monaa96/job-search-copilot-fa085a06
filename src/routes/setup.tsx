@@ -8,6 +8,7 @@ import { pageHead } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { AddCompanyForm, ResumeInput, SearchForm } from "@/components/forms-ui";
 import { JobProgress, useJob } from "@/components/progress-ui";
+import { ConnectionsInfo, ConnectionsUpload } from "@/components/connections-ui";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/setup")({
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/setup")({
   component: SetupPage,
 });
 
-const steps = ["Resume", "Preferences", "Find roles"];
+const steps = ["Resume", "Preferences", "Referrals", "Find roles"];
 
 function SetupPage() {
   const [step, setStep] = useState(0);
@@ -57,6 +58,13 @@ function SetupPage() {
           <div className="mt-6"><SearchForm initial={initial} busy={busy} submitLabel="Continue" onSubmit={(profile) => wrap(() => saveSearch(profile), () => setStep(2))} /></div>
         </>}
         {step === 2 && <>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Optional</p>
+          <h1 className="mt-1 text-2xl font-extrabold">See who can refer you</h1>
+          <div className="mt-4"><ConnectionsInfo /></div>
+          <div className="mt-4"><ConnectionsUpload onUploaded={() => setStep(3)} /></div>
+          <button type="button" onClick={() => setStep(3)} className="mt-5 text-sm font-bold text-primary hover:underline">Skip for now</button>
+        </>}
+        {step === 3 && <>
           <h1 className="text-2xl font-extrabold">Let's find your roles</h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">We'll pick companies that fit your background, check their job boards, and score every relevant opening against your resume. It takes 3 to 5 minutes the first time.</p>
           {job.running ? <JobProgress className="mt-6" title="Finding roles for you…" hint="This is working, even when it looks quiet. Feel free to leave this tab open and come back in a few minutes." logs={job.logs} /> : <>

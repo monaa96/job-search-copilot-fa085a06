@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { RefreshCw, Users, X } from "lucide-react";
+import { ConnectionsDialog } from "@/components/connections-ui";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RoleCard } from "@/components/job-ui";
 import { refreshRoles, setRoleStatus, type RoleSummary } from "@/lib/api";
@@ -32,6 +33,10 @@ export const Route = createFileRoute("/")({
 function RolesPage() {
   const [view, setView] = useState<RoleView>("best");
   const [refreshMessage, setRefreshMessage] = useState("");
+  const [bannerHidden, setBannerHidden] = useState(true);
+  const [importOpen, setImportOpen] = useState(false);
+  useEffect(() => { setBannerHidden(localStorage.getItem("jsc_hide_connections_banner") === "1"); }, []);
+  const dismissBanner = () => { localStorage.setItem("jsc_hide_connections_banner", "1"); setBannerHidden(true); };
   const queryClient = useQueryClient();
   const job = useJob();
   const { data: me } = useSuspenseQuery(meQuery);
@@ -79,6 +84,12 @@ function RolesPage() {
         {tabs.map((tab) => <button key={tab.value} type="button" onClick={() => setView(tab.value)} className={cn("h-10 rounded-lg text-sm font-bold text-muted-foreground transition", view === tab.value && "bg-primary text-primary-foreground")}>{tab.label}</button>)}
       </div>
     </section>
+
+    {me.connections_count === 0 && !bannerHidden && <div className="mt-5 flex flex-col gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-card sm:flex-row sm:items-center">
+      <span className="flex flex-1 items-center gap-3 text-sm font-semibold"><Users className="size-4 shrink-0 text-violet" />Import your LinkedIn connections to see who can refer you at these companies</span>
+      <div className="flex items-center gap-1"><Button size="sm" onClick={() => setImportOpen(true)}>Import connections</Button><Button variant="ghost" size="icon" aria-label="Dismiss" onClick={dismissBanner}><X className="size-4" /></Button></div>
+    </div>}
+    <ConnectionsDialog open={importOpen} onOpenChange={setImportOpen} onUploaded={() => queryClient.invalidateQueries({ queryKey: ["roles"] })} />
 
     <section className="mt-5 grid gap-4" aria-live="polite">
       {roles.length === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">{data.roles.length === 0 ? "No roles yet" : view === "saved" ? "Nothing saved yet" : "No roles in this view"}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{data.roles.length === 0 ? "Your watched companies are checked every morning. You can also check right now and new roles will be scored against your resume." : view === "saved" ? "Bookmark a role to keep it here." : "Try another view or check for new roles."}</p>{view !== "saved" && <Button className="mt-5" onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>}</div>}
