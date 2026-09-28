@@ -5,6 +5,7 @@ import { ArrowLeft, BookOpenCheck, Check, Clipboard, FileText, MessageSquare, Pe
 import { AtAGlance, FullAnalysis, ResumeSuggestions, stripeFor } from "@/components/analysis-ui";
 import { JobProgress, useJob } from "@/components/progress-ui";
 import { requireSetup, showError } from "@/lib/queries";
+import { ConnectionsDialog } from "@/components/connections-ui";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CompanyLogo, FitBadge } from "@/components/job-ui";
@@ -111,7 +112,7 @@ function PlanStepCard({ step, onToggle }: { step: PlanStep; onToggle: () => void
 
 
 function PeopleCard({ detail, drafts, copied, onDraft, draftingIndex, onCopy }: { detail: RoleDetail; drafts: Record<number, string>; copied: number | null; onDraft: (index: number) => void; draftingIndex: number | null; onCopy: (index: number, message: string) => void }) {
-  return <section className="rounded-xl border border-border bg-card p-5 shadow-card"><h2 className="text-lg font-extrabold">People you know at {detail.role.company}</h2>{!detail.has_connections ? <p className="mt-3 text-sm text-muted-foreground">Import LinkedIn connections in Settings to find warm paths into this company.</p> : detail.people.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">None of your connections work there yet.</p> : <div className="mt-4 grid gap-4">{detail.people.map((person) => {
+  return <section className="rounded-xl border border-border bg-card p-5 shadow-card"><h2 className="text-lg font-extrabold">People you know at {detail.role.company}</h2>{!detail.has_connections ? <ImportPrompt roleId={detail.role.id} /> : detail.people.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">None of your connections work there yet.</p> : <div className="mt-4 grid gap-4">{detail.people.map((person) => {
     const message = drafts[person.index];
     return <article key={person.index} className="rounded-xl border border-border bg-background/60 p-4"><a href={person.url} target="_blank" rel="noreferrer" className="font-bold text-foreground hover:text-primary">{person.name}</a><p className="mt-1 text-sm text-muted-foreground">{person.position}</p><p className="mt-2 text-sm leading-6 text-muted-foreground">{person.why}</p><Button className="mt-3" variant="secondary" size="sm" onClick={() => onDraft(person.index)} disabled={draftingIndex === person.index}><PenLine className="size-3.5" />{draftingIndex === person.index ? "Drafting…" : "Draft a message"}</Button>{message && <div className="mt-3 rounded-lg border border-border bg-card p-3"><p className="text-sm leading-6 text-foreground/85">{message}</p><Button className="mt-3" variant="ghost" size="sm" onClick={() => onCopy(person.index, message)}><Clipboard className="size-3.5" />{copied === person.index ? "Copied" : "Copy"}</Button></div>}</article>;
   })}</div>}</section>;
@@ -122,3 +123,9 @@ function AdjacentRoles({ detail, onAdd, addedTitle }: { detail: RoleDetail; onAd
   return <div className="mt-5 grid gap-4">{detail.adjacent.map((item) => <article key={item.title} className="rounded-xl border border-border bg-background/60 p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h3 className="font-extrabold">{item.title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{item.why}</p></div>{item.in_search ? <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">In your search</span> : <Button variant="secondary" size="sm" onClick={() => onAdd(item.title)}>{addedTitle === item.title ? "Added" : "Add to my search"}</Button>}</div>{item.openings.length === 0 && <p className="mt-3 text-xs text-muted-foreground">No matching openings right now.</p>}<div className="mt-4 grid gap-2">{item.openings.map((opening) => <div key={`${opening.company}-${opening.title}`} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"><CompanyLogo company={opening.company} logo_url={opening.logo_url} size="sm" /><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{opening.title}</p><p className="truncate text-xs text-muted-foreground">{opening.company} · {opening.location}</p></div><a href={opening.url} target="_blank" rel="noreferrer" className="text-xs font-bold text-primary hover:text-primary-hover">View</a></div>)}</div></article>)}</div>;
 }
 
+
+function ImportPrompt({ roleId }: { roleId: number }) {
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  return <div className="mt-3"><p className="text-sm text-muted-foreground">See who you know here and get a drafted referral ask.</p><Button className="mt-3" size="sm" onClick={() => setOpen(true)}><UserRoundCheck className="size-3.5" />Import LinkedIn connections</Button><ConnectionsDialog open={open} onOpenChange={setOpen} onUploaded={() => queryClient.invalidateQueries({ queryKey: ["role", roleId] })} /></div>;
+}
