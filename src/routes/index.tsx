@@ -47,7 +47,7 @@ function RolesPage() {
     onError: showError,
     onSuccess: async (result) => { setRefreshMessage(result.summary); await Promise.all([queryClient.invalidateQueries({ queryKey: ["roles"] }), queryClient.invalidateQueries({ queryKey: ["me"] })]); },
   });
-  const updated = me.last_scan ? new Date(me.last_scan).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Not scanned yet";
+  const updated = me.last_scan ? `Last updated ${me.last_scan}` : "Updated automatically every morning";
   const roles = data.roles.filter((role) => view === "all" || (view === "saved" ? role.status === "saved" : role.fit_score >= data.stats.min_score));
   const stats = data.stats;
   const tabs: { value: RoleView; label: string }[] = useMemo(() => [{ value: "best", label: "Best matches" }, { value: "saved", label: "Saved" }, { value: "all", label: "All roles" }], []);
@@ -58,7 +58,7 @@ function RolesPage() {
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">Your daily shortlist</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-normal text-foreground sm:text-5xl">Roles for you</h1>
         <p className="mt-3 text-base font-semibold text-foreground">Don't just find jobs. Close the gap.</p>
-        <p className="mt-1 max-w-2xl text-sm leading-7 text-muted-foreground">Updated {updated} · {data.roles.filter((role) => role.status === "new").length} new roles</p>
+        <p className="mt-1 max-w-2xl text-sm leading-7 text-muted-foreground">{updated}</p>
       </div>
       <div className="flex flex-col items-start gap-2 sm:items-end">
         <Button onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>
@@ -81,7 +81,7 @@ function RolesPage() {
     </section>
 
     <section className="mt-5 grid gap-4" aria-live="polite">
-      {roles.length === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">No roles here yet</h2><p className="mt-2 text-sm text-muted-foreground">Try another view or check for new roles.</p></div>}
+      {roles.length === 0 && <div className="rounded-xl border border-border bg-card p-10 text-center shadow-card"><h2 className="text-lg font-bold">{data.roles.length === 0 ? "No roles yet" : view === "saved" ? "Nothing saved yet" : "No roles in this view"}</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{data.roles.length === 0 ? "Your watched companies are checked every morning. You can also check right now and new roles will be scored against your resume." : view === "saved" ? "Bookmark a role to keep it here." : "Try another view or check for new roles."}</p>{view !== "saved" && <Button className="mt-5" onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>}</div>}
       {roles.map((role) => <RoleCard key={role.id} role={role} onStatus={(status) => statusMutation.mutate({ id: role.id, status })} />)}
       {isFetching && <p className="text-center text-sm font-medium text-muted-foreground">Updating roles…</p>}
     </section>

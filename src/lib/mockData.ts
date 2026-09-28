@@ -20,7 +20,7 @@ const logo = (domain: string) => `https://www.google.com/s2/favicons?domain=${do
 export const mockMe: Me = {
   name: "Alex Morgan", email: "alex@example.com", is_owner: true,
   onboarding: { has_resume: true, has_search: true, has_companies: true },
-  resume_kind: "pdf", connections_count: 684, last_scan: "2026-09-28T08:00:00Z",
+  resume_kind: "pdf", connections_count: 684, last_scan: "Sep 28, 8:00 AM · 12 new roles, 5 at 60+ · 4 more to score next scan",
   usage: { fit_checks: { used: 8, limit: 20 }, analyses: { used: 3, limit: 10 }, discoveries: { used: 1, limit: 5 }, messages: { used: 2, limit: 15 }, coaching: { used: 4, limit: 20 } },
 };
 

@@ -1,3 +1,4 @@
+import { formatShortDate } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Lightbulb, RefreshCw } from "lucide-react";
@@ -27,7 +28,7 @@ function SkillsPage() {
   const label = !data.report ? "Build my skills plan" : `Refresh (${data.new_since_report} new)`;
 
   return <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-    <PageHeader eyebrow="Your coaching plan" title="Skills to build" subtitle={data.report ? `Based on ${data.report.roles_count} roles you've analyzed · Updated ${new Date(data.report.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : "The skill gaps that show up again and again across the roles you want."} action={ready && <Button onClick={() => build.mutate()} disabled={build.isPending || (!!data.report && data.new_since_report === 0)}><RefreshCw className={cn("size-4", build.isPending && "animate-spin")} />{label}</Button>} />
+    <PageHeader eyebrow="Your coaching plan" title="Skills to build" subtitle={data.report ? `Based on ${data.report.roles_count} roles you've analyzed · Updated ${formatShortDate(data.report.created_at)}` : "The skill gaps that show up again and again across the roles you want."} action={ready && <Button onClick={() => build.mutate()} disabled={build.isPending || (!!data.report && data.new_since_report === 0)}><RefreshCw className={cn("size-4", build.isPending && "animate-spin")} />{label}</Button>} />
 
     {!ready && <section className="mt-8 rounded-xl border border-border bg-card p-10 text-center shadow-card">
       <Lightbulb className="mx-auto size-8 text-primary" />
