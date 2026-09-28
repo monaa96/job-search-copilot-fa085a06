@@ -23,7 +23,7 @@ function AuthCallback() {
       window.location.replace("/");
       return;
     }
-    if (error) navigate({ to: "/welcome", search: { error }, replace: true });
+    if (error) window.location.replace(`/welcome?error=${encodeURIComponent(error)}`);
     else navigate({ to: "/welcome", replace: true });
   }, [navigate]);
   return <div className="min-h-screen bg-background"><PageLoading label="Signing you in…" /></div>;
