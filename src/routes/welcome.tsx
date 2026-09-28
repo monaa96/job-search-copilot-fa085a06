@@ -11,7 +11,7 @@ export const Route = createFileRoute("/welcome")({
     // "/" guard sends them to /setup if they still need to finish onboarding.
     if (!USE_MOCK && getToken()) throw redirect({ to: "/" });
   },
-  head: () => pageHead("Job Search Copilot — Find the roles you're actually a fit for", "Job Search Copilot scans matching companies daily, ranks new openings against your resume, and shows you how to close the gap."),
+  head: () => pageHead("Job Search Copilot — Finding a job is a job in itself", "Your job search copilot finds matching roles and shows you how to close the gap — while you're busy working."),
   component: WelcomePage,
 });
 
@@ -39,8 +39,8 @@ function WelcomePage() {
         <div className="flex items-center gap-2.5"><span className="grid size-9 place-items-center rounded-lg bg-primary-foreground/15"><Sparkles className="size-4" /></span><span className="text-sm font-bold">Job Search Copilot</span></div>
         <div className="mt-16 max-w-3xl sm:mt-24">
           <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary-foreground/70">Don't just find jobs. Close the gap.</p>
-          <h1 className="mt-4 text-4xl font-extrabold leading-[1.08] sm:text-6xl">Find the roles you're actually a fit for</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-primary-foreground/85">Job Search Copilot scans the companies that match you every day, ranks new openings against your resume, and shows you how to close the gap for each one.</p>
+          <h1 className="mt-4 text-4xl font-extrabold leading-[1.08] sm:text-6xl">Finding a job is a job in itself</h1>
+          <p className="mt-6 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8 text-primary-foreground/85">Your job search copilot helps you not only find jobs but also fill the gaps that can make you stand out beyond just the resume. While you're busy working, Job Search Copilot is busy finding you a job and giving you suggestions for how to land it, without you doing the research.</p>
           <button type="button" onClick={signIn} className="mt-9 inline-flex h-12 items-center gap-3 rounded-lg bg-card px-5 text-base font-bold text-foreground shadow-card-hover transition hover:-translate-y-0.5"><GoogleMark />Sign in with Google</button>
           {error && <p className="mt-6 max-w-2xl rounded-lg border border-primary-foreground/25 bg-card/15 px-4 py-3 text-sm font-semibold text-primary-foreground">{error}</p>}
         </div>
