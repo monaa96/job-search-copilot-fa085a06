@@ -21,7 +21,7 @@ import {
 export type * from "./mockData";
 
 const USE_MOCK = true;
-const API_URL = import.meta.env.VITE_API_URL ?? "";
+const API_URL = import.meta.env["VITE_API_URL"] ?? "";
 let roles = structuredClone(mockRoles);
 let details = structuredClone(mockRoleDetails);
 let search = structuredClone(mockSearch);

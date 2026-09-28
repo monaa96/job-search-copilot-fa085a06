@@ -42,7 +42,7 @@ export const mockRoles: RoleSummary[] = [
 ];
 
 const rampAnalysis: Analysis = {
-  job_title: mockRoles[0].title, company: "Ramp", match_score: 88,
+  job_title: "Senior Product Manager, Payments Platform", company: "Ramp", match_score: 88,
   verdict: "You are a high-confidence match. The clearest path is to lead with your payments platform outcomes and use a warm introduction to close the scale-perception gap.",
   strong_matches: [
     { skill: "Payments platform", evidence: "Built an internal payments API adopted by 12 teams." },
