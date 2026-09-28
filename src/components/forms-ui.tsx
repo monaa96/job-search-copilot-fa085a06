@@ -1,6 +1,9 @@
 import { useState, type KeyboardEvent } from "react";
 import { FileUp, X } from "lucide-react";
-import { addCompany, type Company, type SearchProfile } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { addCompany, getCompanies, scanCompany, type AddedCompany, type Company, type SearchProfile } from "@/lib/api";
+import { JobProgress } from "@/components/progress-ui";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -73,10 +76,30 @@ export function AddCompanyForm({ onAdded }: { onAdded: (c: Company) => void }) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  return <form className="grid gap-3" onSubmit={async (e) => {
+  const [scans, setScans] = useState<{ id: number; name: string; logs: string[] }[]>([]);
+  const queryClient = useQueryClient();
+  const startScan = (c: AddedCompany) => {
+    setScans((s) => [...s, { id: c.id, name: c.name, logs: [] }]);
+    const onLog = (line: string) => setScans((s) => s.map((x) => x.id === c.id ? { ...x, logs: [...x.logs, line] } : x));
+    void (async () => {
+      try {
+        await scanCompany(c, onLog);
+        const fresh = await getCompanies().catch(() => null);
+        const tile = fresh && [...fresh.watching, ...fresh.suggested].find((x) => x.id === c.id);
+        const n = tile?.open_roles ?? 0;
+        toast.success(n > 0 ? `Found ${n} role${n === 1 ? "" : "s"} at ${c.name}` : `No matching roles at ${c.name} right now. We'll keep checking every morning.`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : `Couldn't check ${c.name}'s job board.`);
+      } finally {
+        setScans((s) => s.filter((x) => x.id !== c.id));
+        for (const key of ["companies", "roles", "me"]) void queryClient.invalidateQueries({ queryKey: [key] });
+      }
+    })();
+  };
+  return <><form className="grid gap-3" onSubmit={async (e) => {
     e.preventDefault(); if (!name.trim()) return;
     setBusy(true); setError("");
-    try { const c = await addCompany(name.trim(), url.trim() || undefined); setName(""); setUrl(""); onAdded(c); }
+    try { const c = await addCompany(name.trim(), url.trim() || undefined); setName(""); setUrl(""); onAdded(c); startScan(c); }
     catch (err) { setError(err instanceof Error ? err.message : "Couldn't add that company."); }
     finally { setBusy(false); }
   }}>
@@ -84,5 +107,7 @@ export function AddCompanyForm({ onAdded }: { onAdded: (c: Company) => void }) {
     <input aria-label="Careers page URL (optional)" className={inputClass} value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Careers page URL (optional)" />
     {error && <p className="rounded-lg bg-destructive-soft px-3 py-2 text-sm text-destructive">{error}</p>}
     <div><Button type="submit" disabled={busy || !name.trim()}>{busy ? "Looking for their job board…" : "Add company"}</Button></div>
-  </form>;
+  </form>
+  {scans.map((scan) => <JobProgress key={scan.id} className="mt-4" title={`Checking ${scan.name}'s job board…`} hint="You can keep using the page while this runs." logs={scan.logs} />)}
+  </>;
 }
