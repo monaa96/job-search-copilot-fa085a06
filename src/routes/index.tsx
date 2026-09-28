@@ -57,7 +57,7 @@ function RolesPage() {
       </div>
       <div className="flex flex-col items-start gap-2 sm:items-end">
         <Button onClick={() => refreshMutation.mutate()} disabled={refreshMutation.isPending}><RefreshCw className={cn("size-4", refreshMutation.isPending && "animate-spin")} />Check for new roles</Button>
-        {(refreshMutation.isPending || refreshMessage) && <p className="text-xs font-medium text-muted-foreground">{refreshMutation.isPending ? refreshMessage : refreshMessage}</p>}
+        {(refreshMutation.isPending || refreshMessage) && <p className="text-xs font-medium text-muted-foreground">{refreshMessage}</p>}
       </div>
     </section>
 
