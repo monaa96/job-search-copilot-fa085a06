@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, BookOpenCheck, BriefcaseBusiness, Check, Clipboard, FileText, MessageSquare, PenLine, Send, Target, UserRoundCheck } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CompanyLogo, FitBadge } from "@/components/job-ui";
 import { addTitleToSearch, buildPlan, draftMessage, getRole, setPlanStep, setRoleStatus, type Analysis, type FitColor, type PlanStep, type RoleDetail } from "@/lib/api";
@@ -86,9 +86,13 @@ function RolePage() {
 
 function useBuildProgress(active: boolean, progress: number, setProgress: (value: number) => void) {
   const steps = useMemo(() => ["Reading the job description…", "Comparing to your resume…", "Finding referral angles…", "Writing your plan…"], []);
+  useEffect(() => {
+    if (!active) return;
+    const timer = window.setTimeout(() => setProgress(Math.min(steps.length - 1, progress + 1)), 1200);
+    return () => window.clearTimeout(timer);
+  }, [active, progress, setProgress, steps.length]);
   if (!active) return { percent: 0, label: steps[0] };
   const next = Math.min(steps.length - 1, progress);
-  setTimeout(() => setProgress(Math.min(steps.length - 1, progress + 1)), 1200);
   return { percent: 20 + next * 22, label: steps[next] };
 }
 
