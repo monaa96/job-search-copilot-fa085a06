@@ -91,7 +91,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 }
 
-const json = (method: string, body?: unknown): RequestInit => ({ method, body: body === undefined ? undefined : JSON.stringify(body) });
+const json = (method: string, body?: unknown): RequestInit => (body === undefined ? { method } : { method, body: JSON.stringify(body) });
 
 // ---------------------------------------------------------------------------
 // Background jobs: start returns { job_id }, then poll /api/jobs/{id}.
